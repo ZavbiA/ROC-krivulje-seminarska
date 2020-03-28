@@ -1,0 +1,253 @@
+---
+title: "Primerjava ploščin pod ROC krivuljo"
+author: "Vesna Zupanc in Anja Žavbi Kunaver"
+date: "3 3 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+# library(MASS)
+library(knitr)
+library(mvtnorm)
+library(ROCR)
+```
+
+# Teoretični uvod
+
+Osnovna ideja ROC krivulj. Lahko uporabiva kaj, kar je napisano na dnu te seminarske ali pa čisto po svoje.
+
+Opredelitev, zakaj bi izbrali marker, ki ima večjo ploščino pod ROC krivuljo.
+
+# Ničelna domneva
+
+Najina ničelna domneva je, da sta markerja enakovredna, oziroma, da sta njuni vrednosti AUC enaki.
+Pri permutacijskih testih, kjer imava za testno statistiko razliko AUC obeh markerjev je 
+$H_0:$ razlika je enaka 0.
+Pri permutacijskih testih, kjer imava za testno statistiko razmerje obeh AUC obeh markerjev je
+$H_0:$ razmerje je enako 1.
+
+# Simulacije podatkov
+
+Poskusili sva z različnimi simulacijami podatkov. Če sva vzeli zelo velik vzorec, so p-vrednosti pri vseh štirih testih prišle enake 0, torej sva vedno zavrnili ničelno domnevo. Rezultati so pričakovani, saj sva podatke simulirali tako, da imata markerja različne AUC vrednosti in pri večjem vzorcu ničelno domnevo lažje zavrnemo.
+
+Najprej sva se odločili za simulacijo vzorca velikosti 100. Markerja sva generirali iz normalne porazdelitve in sicer prvega iz $N(0,1)$ in drugega iz $N(2,1)$. Kovarianco med njima sva nastavili na 0.4. Spremenljivka $Y$ je pokazatelj, ali ima posameznik bolezen ali ne, torej je porazdeljena Bernoullijevo. Generirali sva jo kot linearno kombinacijo markerjev in sicer $Y = 6*X_1+2*X_2 + \epsilon$, kjer je $\epsilon$ napaka, ki je standardno normalno porazdeljena. Vrednosti sva pretvorili v 0 in 1 tako, da je polovica vrednosti 1 (tiste z večjo vrednostjo od mediane) in polovica 0 (tiste z manjšo vrednostjo).
+
+```{r fig.cap="Slika 1: ROC krivulji obeh markerjev"}
+n=100 #najprej vzemi velik n, nato lahko manjše vzorce (najprej sva probali z 10000)
+korelacije = matrix(0.4, nrow=2, ncol=2)
+diag(korelacije) = 1
+x <- rmvnorm(n=n, mean=c(0,2), sigma=korelacije)
+y = 6*x[,1]+2*x[,2] + rnorm(n,0,1)
+#median(y) #meja, od kje naprej so bolni, da jih je približno polovica
+meja=4
+y[y<meja] <- 0
+y[y>=meja] <- 1
+
+df <- data.frame(x[,1],y)
+colnames(df) = c("predictions","labels")
+pred <- prediction(df$predictions, df$labels)
+perf <- performance(pred,"tpr","fpr")
+plot(perf,col="orange")
+
+auc_ROCR1 <- performance(pred, measure = "auc")
+auc_ROCR1 <- auc_ROCR1@y.values[[1]] #želimo čim večjo vrednost
+
+df <- data.frame(x[,2],y)
+colnames(df) = c("predictions","labels")
+pred <- prediction(df$predictions, df$labels)
+perf <- performance(pred,"tpr","fpr")
+plot(perf,col="blue", add=TRUE)
+
+auc_ROCR2 <- performance(pred, measure = "auc")
+auc_ROCR2 <- auc_ROCR2@y.values[[1]]
+
+#shraniva za permutacijske teste
+originalna_razlika = auc_ROCR1 - auc_ROCR2
+originalno_razmerje = auc_ROCR1/auc_ROCR2
+
+
+# x zgeneriraj tako, da bo odvisen od y1 in y2 (lin.regesija)
+# en y naj bo bolj povezan z x kot drug
+# za x si izbereva neko vrednost, da določiva od kje naprej je bolezen in kje ne
+# tako določiš mejo, da za začetek naj jih bo približno pol/pol
+```
+
+```{r}
+podatki <- cbind(x,y)
+colnames(podatki) = cbind("x1","x2","y")
+tabela1 <- head(podatki)
+kable(tabela1, cation="Tabela 1: Izsek iz tabele podatkov")
+```
+
+
+# Permutacijski testi
+
+## Test 1
+
+Najprej narediva permutacijski test, kjer permutirava markerja in gledava razliko.
+
+```{r fig.cap="Slika 2: Porazdelitev testnih statistik, dobljenih s simulacijami"}
+razlika = c()
+for (k in 1:1000){
+  # Korak 1:
+  xp1<-x[sample(1:n),1] #permutacija x-a
+  xp2<-x[sample(1:n),2]
+  
+  # Korak 2:
+  #AUC = ploščina pod ROC krivuljo
+  df <- data.frame(xp1,y)
+  colnames(df) = c("predictions","labels")
+  pred <- prediction(df$predictions, df$labels)
+  auc_ROCR1 <- performance(pred, measure = "auc")
+  auc_ROCR1 <- auc_ROCR1@y.values[[1]]
+  
+  df <- data.frame(xp2,y)
+  colnames(df) = c("predictions","labels")
+  pred <- prediction(df$predictions, df$labels)
+  auc_ROCR2 <- performance(pred, measure = "auc")
+  auc_ROCR2 <- auc_ROCR2@y.values[[1]]
+  
+  razlika[k] = auc_ROCR1 - auc_ROCR2
+}
+
+hist(razlika)
+abline(v=originalna_razlika, col="red", add=TRUE)
+p.vrednost = sum(razlika>originalna_razlika)/1000
+```
+
+Dobljena p-vrednost je `r round(p.vrednost,3)`.
+
+## Test 2
+
+Za drugi permutacijski test permutirava izid in gledava razliko.
+
+```{r fig.cap="Slika 3: Porazdelitev testnih statistik, dobljenih s simulacijami"}
+razlika = c()
+for (k in 1:1000){
+  yp<-y[sample(1:n)] #permutacija y-a
+  
+  df <- data.frame(x[,1],yp)
+  colnames(df) = c("predictions","labels")
+  pred <- prediction(df$predictions, df$labels)
+  auc_ROCR1 <- performance(pred, measure = "auc")
+  auc_ROCR1 <- auc_ROCR1@y.values[[1]]
+  
+  df <- data.frame(x[,2],yp)
+  colnames(df) = c("predictions","labels")
+  pred <- prediction(df$predictions, df$labels)
+  auc_ROCR2 <- performance(pred, measure = "auc")
+  auc_ROCR2 <- auc_ROCR2@y.values[[1]]
+  
+  razlika[k] = auc_ROCR1 - auc_ROCR2
+}
+
+hist(razlika)
+abline(v=originalna_razlika, col="red", add=TRUE)
+p.vrednost = sum(razlika>originalna_razlika)/1000
+```
+
+Dobljena p-vrednost je `r round(p.vrednost,3)`.
+
+## Test 3
+
+Pri tretjem permutacijskem testu permutirava markerja in gledava razmerje.
+
+```{r fig.cap="Slika 4: Porazdelitev testnih statistik, dobljenih s simulacijami"}
+razmerje = c()
+for (k in 1:1000){
+  xp1<-x[sample(1:n),1] #permutacija x-a
+  xp2<-x[sample(1:n),2]
+  
+  df <- data.frame(xp1,y)
+  colnames(df) = c("predictions","labels")
+  pred <- prediction(df$predictions, df$labels)
+  auc_ROCR1 <- performance(pred, measure = "auc")
+  auc_ROCR1 <- auc_ROCR1@y.values[[1]]
+  
+  df <- data.frame(xp2,y)
+  colnames(df) = c("predictions","labels")
+  pred <- prediction(df$predictions, df$labels)
+  auc_ROCR2 <- performance(pred, measure = "auc")
+  auc_ROCR2 <- auc_ROCR2@y.values[[1]]
+  
+  razmerje[k] = auc_ROCR1/auc_ROCR2
+}
+
+hist(razmerje)
+abline(v=originalno_razmerje, col="red", add=TRUE)
+p.vrednost = sum(razmerje>originalno_razmerje)/1000
+```
+
+Dobljena p-vrednost je `r round(p.vrednost,3)`.
+
+## Test 4
+
+Za zadnji permutacijski test permutirava izid in gledava razmerje.
+
+```{r fig.cap="Slika 5: Porazdelitev testnih statistik, dobljenih s simulacijami"}
+razmerje = c()
+for (k in 1:1000){
+  yp<-y[sample(1:n)] #permutacija y-a
+  
+  df <- data.frame(x[,1],yp)
+  colnames(df) = c("predictions","labels")
+  pred <- prediction(df$predictions, df$labels)
+  auc_ROCR1 <- performance(pred, measure = "auc")
+  auc_ROCR1 <- auc_ROCR1@y.values[[1]]
+  
+  df <- data.frame(x[,2],yp)
+  colnames(df) = c("predictions","labels")
+  pred <- prediction(df$predictions, df$labels)
+  auc_ROCR2 <- performance(pred, measure = "auc")
+  auc_ROCR2 <- auc_ROCR2@y.values[[1]]
+  
+  razmerje[k] = auc_ROCR1/auc_ROCR2
+}
+
+hist(razmerje)
+abline(v=originalno_razmerje, col="red", add=TRUE)
+p.vrednost = sum(razmerje>originalno_razmerje)/1000
+```
+
+Dobljena p-vrednost je `r round(p.vrednost,3)`.
+
+# Lastnosti testov
+
+Preverit je potrebno lastnosti vseh štirih permutacijskih testov s simulacijami.
+
+Kateri test bi bil najustreznejši?
+
+# Vse skupaj ponoviva še na drugih podatkih
+
+
+
+
+
+------------------------------------------------------------------------------
+
+
+# Osnovna ideja ROC krivulje
+
+Karakteristike delovanja sprejemnika (Receiver Operating Characteristics - ROC) so grafične metode, ki se ukvarjajo s strojnim učenjem.
+Graf ROC je dvodimenzionalen graf, ki prikazuje razmerje med deležem resničnih pozitivnih primerov (TPR), ki jih odkrijemo in deležem lažnih pozitivnih primerov (FPR). Na osi *x* prikazujemo delež lažnih pozitivnih primerov, na osi *y* pa delež resničnih pozitivnih primerov (Biček, 2009).
+
+
+# Nametane informacije
+
+Narišemo lahko več ROC krivulj glede na prage (za vsak prag svojo).
+
+Točka $(0,0)$ je značilna za vsak ROC graf.
+Točk ne smemo obravnavati posamično, ker bi drugače bila oblika grafa odvisna od tega, katero točko prvo izberemo za obravnavo.
+
+Na strani 13 v (Biček, 2009) je primer algoritma za ROC (psevdokoda).
+
+Uporabni primeri v tej diplomi.
+
+# Viri
+
+* Biček, M. (2009). *Grafični gradnik za merjenje kvalitete klasifikatorja s pomočjo krivulj* (Diplomsko delo). Univerza v Ljubljani, Fakulteta za računalništvo in informatiko, Ljubljana.
+
