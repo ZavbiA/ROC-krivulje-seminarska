@@ -4,7 +4,9 @@ author: "Vesna Zupanc in Anja Žavbi Kunaver"
 date: "3 3 2020"
 output:
   html_document:
-    toc: TRUE
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -12,10 +14,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
 ```{r}
-# library(MASS)
-library(knitr)
-library(mvtnorm)
-library(ROCR)
+source("fun.R")
 ```
 
 # Uvod
@@ -52,7 +51,7 @@ AUC (Area Under the ROC Curve) pa predstavlja ploščino pod ROC krivuljo in s t
 
 Primer takšnega klasifikacijskega problema je naprimer določanje bolnih in zdravih oseb na podlagi nekega markerja. V tem primeru visok AUC pomeni boljše razlikovanje med bolnimi in zdravimi, kar je običajno tudi naš cilj. 
 
-Kot smo omenili že v uvodu, pa se bomo V sklopu naloge odločali med dvema različnima markerjema. Tudi v tem primeru, si želimo marker, ki ima višjo vrednost AUC. Na primer, da želimo da podlagi krvne preiskave določiti, ali mora neka oseba na nadaljne preiskave ali ne. Lahko bi namesto AUC za merilo kakovosti markerja vzeli samo stopnjo resnično pozitivnih primerov in jo maksimizirali. S pomočjo takega kriterija, bi najverjetneje zajeli večji delež bolnih, vendar pa se nam v tem primeru lahko zgodi, da bo na dodatnih presikavah tudi veliko zdravih ljudi. Tako je najboljša mera v takem primeru AUC, saj s tem preverjamo kako dobro nek marker loči med bolnimi in zdravimi. 
+Kot smo omenili že v uvodu, se bomo v sklopu naloge odločali med dvema različnima markerjema. Tudi v tem primeru, si želimo marker, ki ima višjo vrednost AUC. Na primer, da želimo da podlagi krvne preiskave določiti, ali mora neka oseba na nadaljne preiskave ali ne. Lahko bi namesto AUC za merilo kakovosti markerja vzeli samo stopnjo resnično pozitivnih primerov in jo maksimizirali. S pomočjo takega kriterija, bi najverjetneje zajeli večji delež bolnih, vendar pa se nam v tem primeru lahko zgodi, da bo na dodatnih presikavah tudi veliko zdravih ljudi. Tako je najboljša mera v takem primeru AUC, saj s tem preverjamo kako dobro nek marker loči med bolnimi in zdravimi. 
 
 ## Permutacijski test
 
@@ -62,18 +61,172 @@ Porazdelitev testne statistike je generirana iz podatkov samih ob ničelni hipot
 
 Kaj več tukaj? Kaj se zgodi, če sta markerja odvisna, ali je to treba kaj upoštevati
 
+# Praktičen primer
 
-# Ničelna domneva
+Raziskovalec v medicini bi rad s pomočjo vrednosti v krvi (markerji) napovedoval ali ima posameznik neko bolezen. Zbral je podatke o dveh različnih markerjih, med katerima se želi odločiti - izbral bi rad tistega, ki bo bolje napovedoval prisotnost bolezni. 
 
-Najina ničelna domneva je, da sta markerja enakovredna, oziroma, da sta njuni vrednosti AUC enaki.
-Pri permutacijskih testih, kjer imava za testno statistiko razliko AUC obeh markerjev je 
-$H_0:$ razlika je enaka 0.
-Pri permutacijskih testih, kjer imava za testno statistiko razmerje obeh AUC obeh markerjev je
-$H_0:$ razmerje je enako 1.
+## Generiranje in pregled podatkov
 
+Radi bi zgenerirali neke dejanske podatke za naš primer. Potrebujemo torej dva markerja, ki sta medsebojno odvisna in ki imata različen vpliv na to, ali ima posameznik bolezen ali ne. 
+
+Določimo, da markerja prihajata iz multivariatne normalne porazdelitve
+
+$$X\sim N(\mu,\Sigma),$$
+kjer je $\mu$ vektor povprečij in $\Sigma$ variančno-kovariančna matrika. 
+
+Za nadalnje prikaze in testiranje bomo privzeli:
+
+* $\mu_1 = 0$ in $\mu_2 = 2$
+* $\sigma_1 = \sigma_2 = 1$
+* $\rho = 0.4$ 
+
+kjer smo z $\rho$ označili korelacijo med markerjema. Velja torej:
+
+* $X_1 \sim N(0,1)$
+* $X_2 \sim N(2,1)$
+
+Ko določimo porazdelitvi markerjev, določimo še kako vplivata na to, ali ima posameznik bolezen, ali ne. To shranimo v spremenljivko $Y$, ki jo generiramo kot linearno kombinacijo markerjev, kjer s pomočjo koeficientov določimo, kako močno je posamezen marker povezan z prisotnostjo bolezni. V našem primeru bomo $Y$ generirali kot:
+
+$$Y=6X_1+2X_2+\epsilon,$$
+kjer je $\epsilon$ napaka, ki je porazdeljena standardno normalno. Vrednosti pretvorimo v $0$ in $1$ tako, da si pogledamo večji vzorec ($10000$ enot) in na podlagi tega določimo mejno vrednost $Y$ tako, da bo polovica posameznikov imelo bolezen in polovica ne. To naredimo tako, da na velikem vzorcu izračunamo mediano spremenljivke $Y$ in vse vrednosti, ki so manjše od mediane postavimo na $0$ (nima bolezni) ter vse, ki so večje od mediane postavimo na $1$ (ima bolezen). 
+
+V spodnji tabeli tako je primer prvih nekaj vrstic tako generiranega vzorca, kjer je velikost vzorca enaka $100$.
+
+```{r izsek.podatkov}
+source("podatki.R")
+source("porazdelitve.R")
+n<-100; mu1<-0; mu2<-2; ro<-0.4; b1<-6; b2<-2
+
+kable(head(podatki), booktabs=T, caption="Izsek iz tabele podatkov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+```
+
+Poglejmo si, kakšni sta dobljeni ROC krivulji in kakšni sta pripradajoči AUC vrednosti. 
+
+```{r fig.cap="ROC krivulji na generiranem vzorcu"}
+plot.roc(podatki)
+auc.list <- get.AUC(podatki)
+auc1 <- auc.list$AUC1
+auc2 <- auc.list$AUC1
+razlika_vzorec <- auc.list$razlika
+razmerje_vzorec <- auc.list$razmerje
+```
+
+Iz ROC krivulje lahko vidimo, da je na naših podatkih Marker 1 boljši kot Marker 2. Vrednosti AUC, torej velikosti ploščine pod ROC krivuljama pa sta:
+
+* $AUC_1$: `r auc1`
+* $AUC_2$: `r auc2`
+
+
+## Postavitev hipoteze in testiranje
+
+Želimo statistično preveriti, ali je eden izmed markerjev boljši kot drugi. Za testiranje bomo uporabili že prej opisani permutacijski test, ki pa ga bomo naredili na 4 različne načine, glede na to, katere stolpce bomo permutirali (prisotnost bolezni/vrednosti markerjev) in glede na to, katero mero bomo uporabili v ničelni in alternativni domnevi (razlika AUC ali razmerje AUC). Teste označimo z zaporednimi števili. Parametri oziroma definicije testov so prikazani v spodnji tabeli. 
+
+```{r tabela.testov}
+testi <- data.frame("Permutiranje"=rep(c("X1,X2","y"),2),
+                    "Mera" = rep(c("Razlika","Razmerje"),each=2),
+                    row.names = paste0("Test ",1:4))
+
+kable(head(testi), booktabs=T, caption="Definicije testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+```
+
+### Ničelna domneva
+
+Naša ničelna domneva je, da sta markerja enakovredna, oziroma, da sta njuni vrednosti AUC enaki.
+Pri permutacijskih testih, kjer imamo za testno statistiko razliko AUC obeh markerjev (Test 1 in Test 2) je 
+
+$$H_0: AUC_1-AUC_2=0 \text{ (razlika je enaka 0)}$$
+
+Vrednost testne statistike na vzorcu je enaka $AUC_1-AUC_2=$ `r razlika_vzorec`.
+
+Pri permutacijskih testih, kjer imamo za testno statistiko razmerje AUC obeh markerjev (Test 3 in Test 4) pa je
+
+$$H_0: \frac{AUC_1}{AUC_2}=1 \text{ (razmerje je enako 1)}$$
+Vrednost testne statistike na vzorcu je enaka $\frac{AUC_1}{AUC_2}=$ `r razmerje_vzorec`.
+
+Vidimo, da so vsi testi dvostranski. Pri testiranju bomo povsod uporabljali stopnjo značilnosti $\alpha = 0.05$. 
+
+### Rezultati testov
+
+Poglejmo si, kakšne rezultate dobimo na generiranih podatkih. Rezultate bomo za vsak test prikazali tudi grafično, da vidimo še dobljene porazdelitve testnih statistik pod ničelno domnevo. Na porazdelitvi bo s sivo barvo tudi prikazano kritično območje. 
+
+**Rezultati za Test 1 (permutiranje X1,X2 in razlika)**
+
+```{r fig.cap="Porazdelitev testne statistike pod H_0 in rezultat testa za Test 1"}
+test1 <- testiraj(podatki, por1)
+plot.test(test1, iz=T, p.val=T)
+```
+
+Dobljena vrednost testne statistike je enaka `r test1$t`, izračunana p-vrednost znaša `r test1$p`. Tudi iz slike lahko razberemo, da je testna statistika znotraj kritičnega območja, zato v tem primeru pri stopnji značilnosti $\alpha=0.05$ zavrnemo $H_0$ in rečemo, da obstaja statistično značilna razlika med AUC markerjev. Glede na to, da se testna statistika nahaja na desni strani, pa sklepamo, da velja $AUC_1>AUC_2$.
+
+**Rezultati za Test 2 (permutiranje y in razlika)**
+
+```{r fig.cap="Porazdelitev testne statistike pod H_0 in rezultat testa za Test 2"}
+test2 <- testiraj(podatki, por2)
+plot.test(test2, iz=T, p.val=T)
+```
+
+Dobljena vrednost testne statistike je enaka kot v prejšnjem testu, torej `r test2$t`, izračunana p-vrednost pa znaša `r test1$p`. Ponovno razberemo tako iz izračunanih vrednosti kot iz grafičnega prikaza, da je testna statistika znotraj kritičnega območja, zato pri stopnji značilnosti $\alpha=0.05$ zavrnemo $H_0$ in rečemo, da obstaja statistično značilna razlika med AUC markerjev. Glede na to, da se testna statistika nahaja na desni strani, pa sklepamo, da velja $AUC_1>AUC_2$.
+
+**Rezultati za Test 3 (permutiranje X1,X2 in razmerje)**
+
+```{r fig.cap="Porazdelitev testne statistike pod H_0 in rezultat testa za Test 3"}
+test3 <- testiraj(podatki, por3)
+plot.test(test3, iz=T, p.val=T)
+```
+
+Dobljena vrednost testne statistike znaša `r test3$t`, izračunana p-vrednost pa `r test1$p`. Kot vidimo, pri stopnji značilnosti $\alpha=0.05$ ne moremo zavrniti ničelne hipoteze.
+
+**Rezultati za Test 4 (permutiranje y in razmerje)**
+
+```{r fig.cap="Porazdelitev testne statistike pod H_0 in rezultat testa za Test 3"}
+test4 <- testiraj(podatki, por4)
+plot.test(test4, iz=T, p.val=T)
+```
+
+Dobljena vrednost testne statistike znaša `r test4$t`, izračunana p-vrednost pa `r test4$p`. Ponovno pri stopnji značilnosti $\alpha=0.05$ ne moremo zavrniti ničelne hipoteze.
+
+## Lastnosti testov
+
+Preverili bomo lastnosi vseh štirih testov, in izbrali tistega, ki je najbolj primeren za naše podatke. 
+
+### Velikost testa
+
+Za preverjanje velikosti testa, bomo podatke simulirali pod ničelno hipotezo, ki pravi, da je AUC enaka za oba parametra. Za določitev velikosti testa, večkrat simuliramo podatke in izvedemo test, potem pa pogledamo delež zavrnjenih ničelnih hipotez, za katerega želimo, da je manjši ali enak stopnji značilnosti $\alpha=0.05$. 
+
+```{r}
+
+source("lastnostiTestov.R")
+
+n <- 100; mu1 <- 0; mu2 <-2; ro <-0.4; b1 <- 3; b2 <- 3
+
+kable(head(velikosti), booktabs=T, caption="Velikosti testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+```
+
+Vse dobimo 0?!?!?
+
+
+### Moč testa
+
+Za preverjanje moči testa, bomo podatke simulirali z pravimi vrednostmi, ki smo jih določili na začetku poglavja. Pogledali bomo, kakšno moč ima posamezen test, tako, da bomo podatke simulirali večkrat in na koncu izračunali delež zavrnjenih ničelnih hipotez, za katerega si seveda želimo, da je čimvečji.
+
+
+```{r moci}
+# Določimo podatke pod HA
+n <- 100; mu1 <- 0; mu2 <-2; ro <-0.4; b1 <- 6; b2 <- 2
+
+kable(head(moci), booktabs=T, caption="Moči testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+```
+
+------------------------------------------------------------------------------
 # Simulacije podatkov
 
 Poskusili sva z različnimi simulacijami podatkov. Če sva vzeli zelo velik vzorec, so p-vrednosti pri vseh štirih testih prišle enake 0, torej sva vedno zavrnili ničelno domnevo. Rezultati so pričakovani, saj sva podatke simulirali tako, da imata markerja različne AUC vrednosti in pri večjem vzorcu ničelno domnevo lažje zavrnemo. Na podlagi te ugotovitve sva se odločili za simulacije manjših vzorcev. Pri vsakem primeru natančno opiševa postopek generiranja podatkov.
+
+
 
 # Permutacijski testi
 
@@ -250,19 +403,19 @@ y.test[y.test>=meja] <- 1
 ```
 
 ```{r fig.cap="Histogram vrednosti testne statistike pod H0 za test1"}
-test1(x,y.test)
+#test1(x,y.test)
 ```
 
 ```{r fig.cap="Histrogram vrednosti testne statistike pod H0 za test2"}
-test2(x,y.test)
+#test2(x,y.test)
 ```
 
 ```{r fig.cap="Histrogram vrednosti testne statistike pod H0 za test3"}
-test3(x,y.test)
+#test3(x,y.test)
 ```
 
 ```{r fig.cap="Histrogram vrednosti testne statistike pod H0 za test4"}
-test4(x,y.test)
+#test4(x,y.test)
 ```
 
 Vidimo, da je porazdelitev testne statistike pri vseh štirih testih podobna normalni.??
@@ -270,39 +423,35 @@ Vidimo, da je porazdelitev testne statistike pri vseh štirih testih podobna nor
 ## Rezultati testov
 
 ```{r fig.cap="Porazdelitev testih statistik za simulacije test1"}
-test1(x=x,y=y)
-abline(v=originalna_razlika, col="red", add=TRUE)
+#test1(x=x,y=y)
+#abline(v=originalna_razlika, col="red", add=TRUE)
 ```
 
-Dobljena p-vrednost za test1 je `r round(p.vrednost,3)`.
+Dobljena p-vrednost za test1 je r round(p.vrednost,3).
 
 ```{r fig.cap="Porazdelitev testih statistik za simulacije test2"}
-test2(x=x,y=y)
-abline(v=originalna_razlika, col="red", add=TRUE)
+#test2(x=x,y=y)
+#abline(v=originalna_razlika, col="red", add=TRUE)
 ```
 
-Dobljena p-vrednost za test2 je `r round(p.vrednost,3)`.
+Dobljena p-vrednost za test2 je r round(p.vrednost,3).
 
 ```{r fig.cap="Porazdelitev testih statistik za simulacije test3"}
-test3(x=x,y=y)
-abline(v=originalno_razmerje, col="red", add=TRUE)
+#test3(x=x,y=y)
+#abline(v=originalno_razmerje, col="red", add=TRUE)
 ```
 
-Dobljena p-vrednost za test3 je `r round(p.vrednost,3)`.
+Dobljena p-vrednost za test3 je r round(p.vrednost,3).
 
 ```{r fig.cap="Porazdelitev testih statistik za simulacije test4"}
-test4(x=x,y=y)
-abline(v=originalno_razmerje, col="red", add=TRUE)
+#test4(x=x,y=y)
+#abline(v=originalno_razmerje, col="red", add=TRUE)
 ```
 
-Dobljena p-vrednost za test4 je `r round(p.vrednost,3)`.
+Dobljena p-vrednost za test4 je r round(p.vrednost,3).
 
 
-# Lastnosti testov
 
-Preverit je potrebno lastnosti vseh štirih permutacijskih testov.
-
-Kateri test bi bil najustreznejši?
 
 
 ------------------------------------------------------------------------------

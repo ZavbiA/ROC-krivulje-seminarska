@@ -10,11 +10,7 @@
 ##                      Potrebne knjižnice                      --
 ##----------------------------------------------------------------
 
-library(dplyr)
-library(knitr)
-library(mvtnorm)
-library(ROCR)
-
+source("lib.r")
 
 ##--------------------------------------------------------------------
 ##  Funkcije za generiranje podatkov, risanje ROC in računanje AUC  --
@@ -43,12 +39,12 @@ get.data <- function(n, mu1, mu2, ro, b1, b2){
 plot.roc <- function(df){
   pred1 <- prediction(df$X1, df$y) 
   perf1 <- performance(pred1,"tpr","fpr")
-  plot(perf1,col="orange", main = naslov)
+  plot(perf1,col="orange")
   
   pred2 <- prediction(df$X2, df$y) 
   perf2 <- performance(pred2,"tpr","fpr")
   plot(perf2,col="blue", add=TRUE)
-  legend(0.83,0.2,c('Marker 1','Marker 2'),col=c('orange','blue'),lwd=1)
+  legend(0.75,0.2,c('Marker 1','Marker 2'),col=c('orange','blue'),lwd=1)
 }
 
 get.AUC <- function(df){
@@ -83,27 +79,31 @@ get.AUC <- function(df){
 
 permutiraj <- function(df, perm.cols, m.type){
   #Najprej permutiramo podatke
-  df[, perm.cols] <- df[sample(1:nrow(df)), perm.cols]
+  for(i in perm.cols){
+    df[, i] <- df[sample(1:nrow(df)), i]
+  }
+  
   get.AUC(df)[m.type] %>% as.numeric()
 }
 
-porazdelitev <- function(df, perm.cols, m.type, n=5000){
+porazdelitev <- function(df, perm.cols, m.type, n=1000){
   porazdelitev <- replicate(n, permutiraj(df, perm.cols, m.type))
-  porazdelitev
+  return(list("dist" = porazdelitev,
+              "m.type" = m.type))
 }
   
-testiraj <- function(df, porazdelitev, m.type){
-  test.stat <- get.AUC(df)[m.type] %>% as.numeric()
+testiraj <- function(df, porazdelitev){
+  test.stat <- get.AUC(df)[porazdelitev$m.type] %>% as.numeric()
   #Obnašamo se, kot da je porazdelitev simetrična
-  p.vr <- 2*sum(porazdelitev > test.stat)/length(porazdelitev)
+  p.vr <- 2*sum(porazdelitev$dist > test.stat)/length(porazdelitev$dist)
   
-  return(list("porazdelitev" = porazdelitev,
+  return(list("porazdelitev" = porazdelitev$dist,
               "t" = test.stat,
               "p" = p.vr))
 }
 
 
-plot.test <- function(data, test.num, iz=FALSE, p.val=FALSE){
+plot.test <- function(data, iz=FALSE, p.val=FALSE){
   #hist(data$porazdelitev, freq=FALSE,
   #     xlab = "x", ylab = expression(f[X]))
   plt <- density(data$porazdelitev)
@@ -111,7 +111,7 @@ plot.test <- function(data, test.num, iz=FALSE, p.val=FALSE){
   sp.meja <- quantile(data$porazdelitev, probs = c(0.025))
   zg.meja <- quantile(data$porazdelitev, probs = c(0.975))
   
-  plot(plt, main=paste0("Test ",test.num), xlab="x",
+  plot(plt, main="", xlab="x",
        ylab = expression(f[X]) )
   if(p.val){
   polygon(c(zg.meja, plt$x[plt$x>=zg.meja]),
