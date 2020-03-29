@@ -18,11 +18,50 @@ library(mvtnorm)
 library(ROCR)
 ```
 
-# Teoretični uvod
+# Uvod
 
-Osnovna ideja ROC krivulj. Lahko uporabiva kaj, kar je napisano na dnu te seminarske ali pa čisto po svoje.
+V seminarski nalogi želimo prikazali uporabo ROC krivulj in kako nam pomagajo pri odločanju med dvema klasifikatorjema. ...
 
-Opredelitev, zakaj bi izbrali marker, ki ima večjo ploščino pod ROC krivuljo.
+# Teoretične osnove
+
+## ROC krivulje in AUC
+
+Za začetek si poglejmo, kaj so to ROC krivulje in kaj je mera AUC. ROC krivulje (ang.ROC curve - receiver operating characteristic curve) je grafični prikaz, ki prikazuje uspešnost klasifikacijskega modela pri vseh pragovih klasifikacije. Prikazuje dva parametra:
+
+* Stopnja resnično poztivnih (TPR - True positive rate)
+* Stopnja lažno pozitivnih (FPR - False positive rate)
+
+Definirajmo še kratice:
+
+* TP (true positive): št. resnično pozitivnih primerov
+* TN (true negative): št. resnično negativnih primerov
+* FP (false positive): št. lažno pozitivnih primerov
+* FN (false negative): št. lažno negativnih primerov
+
+Stopnja resnično pozitivnih (TPR) je tako definirana kot:
+
+$$TPR = \frac{TP}{TP+FN}$$
+Stopnja lažno pozitivnih (FPR) pa kot:
+
+$$FPR = \frac{FP}{FP+TN}$$
+ROC krivulja nariše TPR v primerjavi z FPR, pri različnih pragovih klasifikacije. Z znižanjem praga za razvrstitev je več postavk opredeljenih kot pozitivnih, kar povečuje tako napačne kot resnične pozitivne. 
+
+Neka slika ROC? 
+
+AUC (Area Under the ROC Curve) pa predstavlja ploščino pod ROC krivuljo in s tem predstavlja skupno merilo uspešnosti za vse možne pragove klasifikacije. Torej, ROC predstavlja verjetnostno krivuljo, AUC pa predstavlja stopnjo ali merilo ločljivosti. Pove nam, koliko model razlikuje med posameznimi razredi. Višji kot je AUC, boljši je model pri napovedovanju oziroma določanju razredov. 
+
+Primer takšnega klasifikacijskega problema je naprimer določanje bolnih in zdravih oseb na podlagi nekega markerja. V tem primeru visok AUC pomeni boljše razlikovanje med bolnimi in zdravimi, kar je običajno tudi naš cilj. 
+
+Kot smo omenili že v uvodu, pa se bomo V sklopu naloge odločali med dvema različnima markerjema. Tudi v tem primeru, si želimo marker, ki ima višjo vrednost AUC. Na primer, da želimo da podlagi krvne preiskave določiti, ali mora neka oseba na nadaljne preiskave ali ne. Lahko bi namesto AUC za merilo kakovosti markerja vzeli samo stopnjo resnično pozitivnih primerov in jo maksimizirali. S pomočjo takega kriterija, bi najverjetneje zajeli večji delež bolnih, vendar pa se nam v tem primeru lahko zgodi, da bo na dodatnih presikavah tudi veliko zdravih ljudi. Tako je najboljša mera v takem primeru AUC, saj s tem preverjamo kako dobro nek marker loči med bolnimi in zdravimi. 
+
+## Permutacijski test
+
+Za testiranje hipotez bomo uporabljali permutacijski test. Permutacijski test je zelo splošen pristop za testiranje statističnih hipotez, saj nima predpostavk o porazdelitvah in je zato tudi zelo primeren, kadar podatki niso skladni s predpostavko o njihovi porazdelitvi. 
+
+Porazdelitev testne statistike je generirana iz podatkov samih ob ničelni hipotezi, ki predpostavlja, da so vsi možni pari dveh spremenljivk enako verjetni. To dosežemo tako, da podatke ene spremenljivke naključno porazdelimo, drugo spremenljivko pa fiksiramo. Na koncu pa primerjamo dobljeno vrednost testne statistike in iz generirane porazdelitve odčitamo p-vrednost.
+
+Kaj več tukaj? Kaj se zgodi, če sta markerja odvisna, ali je to treba kaj upoštevati
+
 
 # Ničelna domneva
 
