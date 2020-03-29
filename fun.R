@@ -75,9 +75,11 @@ get.AUC <- function(df){
 ##  Funkcija, s pomočjo katere dobimo porazdelitev testne statistike potrebuje   
 ##  več vhodnih parametrov: 
 ##    * podatki (df)
-##    * kaj permutiramo (y/x)
-##    * kaj preverjamo (razmerje/razlike)             
+##    * perm.cols: kaj permutiramo (c("y") ali c("X1","X2))
+##    * m.type: kaj preverjamo ("razmerje"/"razlika")             
 ##    * n (št. ponovitev izračuna)  
+
+
 
 permutiraj <- function(df, perm.cols, m.type){
   #Najprej permutiramo podatke
@@ -96,6 +98,37 @@ testiraj <- function(df, perm.cols, m.type, n=5000){
 }
 
 
+plot.test <- function(data, test.num, iz=FALSE, p.val=FALSE){
+  #hist(data$porazdelitev, freq=FALSE,
+  #     xlab = "x", ylab = expression(f[X]))
+  plt <- density(data$porazdelitev)
+
+  sp.meja <- quantile(data$porazdelitev, probs = c(0.025))
+  zg.meja <- quantile(data$porazdelitev, probs = c(0.975))
+  
+  plot(plt, main=paste0("Test ",test.num), xlab="x",
+       ylab = expression(f[X]) )
+  if(p.val){
+  polygon(c(zg.meja, plt$x[plt$x>=zg.meja]),
+          c(0,plt$y[plt$x>=zg.meja]), col="grey")
+  polygon(c(plt$x[plt$x<=sp.meja], sp.meja),
+          c(plt$y[plt$x<=sp.meja], 0), col="grey")
+  }
+
+  if(p.val){
+    #abline(v=data$t, col="red", add=TRUE)
+    arrows(x0=data$t, y0=max(plt$y)/8, y1=0, length=0.1,
+           col="red") 
+    text(data$t, max(plt$y)/6.5, paste0("p = ", data$p),
+         cex = .8, col="red")
+  }
+  
+}
 
 
+### PRIMER:
+
+#df <- get.data(100,0,2,0.4,6,2)
+#data.test <- testiraj(df, c("y"), "razlika", n=1000)
+#plot.test(data.test, 1, iz=TRUE, p.val=TRUE)
 
