@@ -87,10 +87,15 @@ permutiraj <- function(df, perm.cols, m.type){
   get.AUC(df)[m.type] %>% as.numeric()
 }
 
-testiraj <- function(df, perm.cols, m.type, n=5000){
-  test.stat <- get.AUC(df)[m.type] %>% as.numeric()
+porazdelitev <- function(df, perm.cols, m.type, n=5000){
   porazdelitev <- replicate(n, permutiraj(df, perm.cols, m.type))
-  p.vr <- sum(porazdelitev > test.stat)/n
+  porazdelitev
+}
+  
+testiraj <- function(df, porazdelitev, m.type){
+  test.stat <- get.AUC(df)[m.type] %>% as.numeric()
+  #Obnašamo se, kot da je porazdelitev simetrična
+  p.vr <- 2*sum(porazdelitev > test.stat)/length(porazdelitev)
   
   return(list("porazdelitev" = porazdelitev,
               "t" = test.stat,
