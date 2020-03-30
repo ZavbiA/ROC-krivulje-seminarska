@@ -99,9 +99,15 @@ porazdelitev <- function(df, perm.cols, m.type, n=1000){
   
 testiraj <- function(df, porazdelitev){
   test.stat <- get.AUC(df)[porazdelitev$m.type] %>% as.numeric()
-  #Obnašamo se, kot da je porazdelitev simetrična
-  p.vr <- 2*sum(porazdelitev$dist > test.stat)/length(porazdelitev$dist)
-  
+  if (porazdelitev$m.type=="razlika"){
+    p.vr <- sum(abs(porazdelitev$dist) > test.stat)/length(porazdelitev$dist)
+  }
+  else{
+    druga.meja = 1/test.stat
+    zgornja = max(druga.meja,test.stat)
+    spodnja = min(druga.meja,test.stat)
+    p.vr <- (sum(porazdelitev$dist > zgornja)+sum(porazdelitev$dist < spodnja))/length(porazdelitev$dist)
+  }
   return(list("porazdelitev" = porazdelitev$dist,
               "t" = test.stat,
               "p" = p.vr))
