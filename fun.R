@@ -16,8 +16,21 @@ source("lib.r")
 ##  Funkcije za generiranje podatkov, risanje ROC in računanje AUC  --
 ##--------------------------------------------------------------------
 
-#funkcija za dolocanje meje na podatkih
 doloci.mejo <- function(mu1, mu2, ro, b1, b2){
+  
+  # Funkcija za dolocanje meje na podatkih za NORMALNO PORAZD.
+  # (uporablja se znotraj generiranja podatkov)
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   mu1...povprečje za marker 1
+  #   mu2...povprečje za marker 2
+  #   ro...korelacijski faktor med markerjema
+  #   b1...vpliv na bolezen za marker 1
+  #   b2...vpliv na bolezen za marker 2
+  # OUTPUT:
+  #   meja (int) za določitev bolezni
+  #---------------------------------------------------------------------
+  
   korelacije <- matrix(ro, nrow=2, ncol=2)
   diag(korelacije) <- 1
   x <- rmvnorm(n=10000, mean=c(mu1,mu2), sigma=korelacije)
@@ -25,8 +38,48 @@ doloci.mejo <- function(mu1, mu2, ro, b1, b2){
   round(median(y))
 }
 
-#funkcija za generiranje podatkov
+
+doloci.mejo.gamma <- function(b1, b2){
+  
+  # Funkcija za dolocanje meje na podatkih za GAMMA PORAZD.
+  # (uporablja se znotraj generiranja podatkov)
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   b1...vpliv na bolezen za marker 1
+  #   b2...vpliv na bolezen za marker 2
+  # OUTPUT:
+  #   meja (int) za določitev bolezni
+  #---------------------------------------------------------------------
+  
+  e1 = rexp(10000, rate=2)
+  e2 = rexp(10000, rate=2)
+  e3 = rexp(10000, rate=2)
+  
+  X1 = e1 + e3 # prvi marker
+  X2 = e2 + e3 # drugi marker
+  y <- b1*x[,1]+b2*x[,2] + rnorm(n=10000,0,1)
+  round(median(y))
+}
+
+
 get.data <- function(n, mu1, mu2, ro, b1, b2){
+  
+  # Funkcija za generiranje vzorca - NORMALNA PORAZDELITEV
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   n...velikost vzorca
+  #   mu1...povprečje za marker 1
+  #   mu2...povprečje za marker 2
+  #   ro...korelacijski faktor med markerjema
+  #   b1...vpliv na bolezen za marker 1
+  #   b2...vpliv na bolezen za marker 2
+  # OUTPUT:
+  #   tabela s stolpci:
+  #     y...binarna(0/1) označuje ali ima posameznik bolezen (0-zdrav,1-bolen)
+  #     X1...vrednost markerja 1
+  #     X2...vrednost markerja 2
+  #---------------------------------------------------------------------
+  
   korelacije <- matrix(ro, nrow=2, ncol=2)
   diag(korelacije) <- 1
   x <- rmvnorm(n=n, mean=c(mu1,mu2), sigma=korelacije)
@@ -38,8 +91,46 @@ get.data <- function(n, mu1, mu2, ro, b1, b2){
   return(data.frame(y,x))
 }
 
-#izrise obe ROC krivulji
+get.data.gamma <- function(n, b1, b2){
+  
+  # Funkcija za generiranje vzorca - GAMMA PORAZDELITEV
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   n...velikost vzorca
+  #   ro...korelacijski faktor med markerjema
+  #   b1...vpliv na bolezen za marker 1
+  #   b2...vpliv na bolezen za marker 2
+  # OUTPUT:
+  #   tabela s stolpci:
+  #     y...binarna(0/1) označuje ali ima posameznik bolezen (0-zdrav,1-bolen)
+  #     X1...vrednost markerja 1
+  #     X2...vrednost markerja 2
+  #---------------------------------------------------------------------
+  
+  e1 = rexp(n, rate=2)
+  e2 = rexp(n, rate=2)
+  e3 = rexp(n, rate=2)
+
+  X1 = e1 + e3 # prvi marker
+  X2 = e2 + e3 # drugi marker
+  y <- b1*x[,1]+b2*x[,2] + rnorm(n,0,1)
+  
+  meja <- doloci.mejo.gamma(b1, b2)
+  y[y<meja] <- 0
+  y[y>=meja] <- 1
+  
+  return(data.frame(y,x))
+}
+
+
 plot.roc <- function(df){
+  # Funkcija, ki izriše obe ROC krivulji
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   df...vzorec s stolpci y, X1, X2
+  # OUTPUT:
+  #   Graf z ROC krivuljama in oznakami Markerjev
+  #---------------------------------------------------------------------
   pred1 <- prediction(df$X1, df$y) 
   perf1 <- performance(pred1,"tpr","fpr")
   plot(perf1,col="orange")
@@ -50,8 +141,19 @@ plot.roc <- function(df){
   legend(0.75,0.2,c('Marker 1','Marker 2'),col=c('orange','blue'),lwd=1)
 }
 
-# izracuna oba AUC-ja, vrne list(AUC1,AUC2,razlika,razmerje)
 get.AUC <- function(df){
+  
+  # Funkcija, ki na vzorcu iračuna več statistik
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   df...vzorec s stolpci y, X1, X2
+  # OUTPUT:
+  #   list (4) z vrednostmi:
+  #     AUC1...AUC za Marker 1 (X1)
+  #     AUC2...AUC za Marker 2 (X2)
+  #     razlika...AUC1-AUC2
+  #     razmerje...AUC1/AUC2
+  #---------------------------------------------------------------------
   pred1 <- prediction(df$X1, df$y) 
   auc_ROCR1 <- performance(pred1, measure = "auc")
   auc_ROCR1 <- auc_ROCR1@y.values[[1]]
@@ -69,55 +171,71 @@ get.AUC <- function(df){
 ##                Funkcije za testiranje - TESTI                --
 ##----------------------------------------------------------------
 
-## PRVI TEST 
-## Permutiramo markerje, razlika
-
-##  Funkcija, s pomočjo katere dobimo porazdelitev testne statistike potrebuje   
-##  več vhodnih parametrov: 
-##    * podatki (df)
-##    * perm.cols: kaj permutiramo (c("y") ali c("X1","X2))
-##    * m.type: kaj preverjamo ("razmerje"/"razlika")             
-##    * n (št. ponovitev izračuna)  
-
-
-
 permutiraj <- function(df, perm.cols, m.type){
-  #Najprej permutiramo podatke
+  
+  # Funkcija, ki na vzorcu permutira podatke in vrne željeno statistiko
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   df...vzorec s stolpci y, X1, X2
+  #   perm.cols...katere vrednosti permutiramo. Možni: c("y") ali c("X1","X2")
+  #   m.type...Kaj računamo. Možni: "razlika"/"razmerje"
+  # OUTPUT:
+  #   vrednost željene statistike (razmerje ali razlika AUC)
+  #---------------------------------------------------------------------
   for(i in perm.cols){
     df[, i] <- df[sample(1:nrow(df)), i]
   }
   get.AUC(df)[m.type] %>% as.numeric()
 }
-
-#vrne porazdelitev testne statistike
-porazdelitev <- function(df, perm.cols, m.type, n=1000){
+  
+testiraj <- function(df, perm.cols, m.type, n=1000){
+  
+  # Funkcija, ki zgenerira porazdelitev pod ničelno domnevo (permutacije)
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   df...vzorec s stolpci y, X1, X2
+  #   perm.cols...katere vrednosti permutiramo. Možni: c("y") ali c("X1","X2")
+  #   m.type...Kaj računamo. Možni: "razlika"/"razmerje"
+  #   n...število permutacij za generiranje porazdelitve
+  # OUTPUT:
+  #   list (3) z elementi:
+  #     porazdelitev...vektor dolžine n, dobljena porazdelitev testne stat.
+  #     t...vrednost testne statistike na vzorcu
+  #     p...vrednost p
+  #---------------------------------------------------------------------
+  
   porazdelitev <- replicate(n, permutiraj(df, perm.cols, m.type))
   
-  return(list("dist" = porazdelitev,
-              "m.type" = m.type))
-} #m.type = razlika ali razmerje, dist pa so dejanske vrednosti razlike/razmerja
+  test.stat <- get.AUC(df)[m.type] %>% as.numeric()
   
-testiraj <- function(df, porazdelitev){
-  test.stat <- get.AUC(df)[porazdelitev$m.type] %>% as.numeric()
-  if (porazdelitev$m.type=="razlika"){
-    p.vr <- sum(abs(porazdelitev$dist) > test.stat)/length(porazdelitev$dist)
+  if (m.type=="razlika"){
+    p.vr <- sum(abs(porazdelitev) > test.stat)/length(porazdelitev)
   }
   else{
     druga.meja = 1/test.stat
     zgornja = max(druga.meja,test.stat)
     spodnja = min(druga.meja,test.stat)
-    p.vr <- (sum(porazdelitev$dist > zgornja)+sum(porazdelitev$dist < spodnja))/length(porazdelitev$dist)
+    p.vr <- (sum(porazdelitev > zgornja)+sum(porazdelitev < spodnja))/length(porazdelitev)
   }
-  return(list("porazdelitev" = porazdelitev$dist,
+  
+  return(list("porazdelitev" = porazdelitev,
               "t" = test.stat,
               "p" = p.vr))
-} #porazdelitev vrne to kar vrne funkcija porazdelitev
-#t je originalna vrednost
+} 
 
 
-plot.test <- function(data, iz=FALSE, p.val=FALSE){
-  #hist(data$porazdelitev, freq=FALSE,
-  #     xlab = "x", ylab = expression(f[X]))
+plot.test <- function(data, iz=TRUE, p.val=TRUE){
+  
+  # Funkcija, ki nariše rezultate testa
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   data...podatki dobljeni s funkcijo testiraj
+  #   iz...ali naj nariše kritično območje. Možni: TRUE/FALSE
+  #   p.val...ali naj označi testno stat. in vr.p. Možni: TRUE/FALSE
+  # OUTPUT:
+  #   grafični prikaz testa (density, poljubno p.vr in testna stat.)
+  #---------------------------------------------------------------------
+
   plt <- density(data$porazdelitev)
 
   sp.meja <- quantile(data$porazdelitev, probs = c(0.025))
@@ -140,12 +258,7 @@ plot.test <- function(data, iz=FALSE, p.val=FALSE){
          cex = .8, col="red")
   }
   
-} #izrise graf density vzorca, lahko se p-vrednost in kriticno obmocje
+}
 
 
-### PRIMER:
-
-#df <- get.data(100,0,2,0.4,6,2)
-#data.test <- testiraj(df, c("y"), "razlika", n=1000)
-#plot.test(data.test, 1, iz=TRUE, p.val=TRUE)
 

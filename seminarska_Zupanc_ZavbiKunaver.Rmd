@@ -14,7 +14,10 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 ```
 
 ```{r}
+source("lib.R")
 source("fun.R")
+source("rezultati_normal.R") #vsebuje: podatki, test1:test4, velikosti, moč
+#source("rezultati_gamma.R") #vsebuje: podatki.gamma, test.gamma1:test.gamma4, velikosti.gamma, moc.gamma
 ```
 
 # Uvod
@@ -93,10 +96,6 @@ kjer je $\epsilon$ napaka, ki je porazdeljena standardno normalno. Vrednosti pre
 V spodnji tabeli je primer prvih nekaj vrstic tako generiranega vzorca, kjer je velikost vzorca enaka $100$.
 
 ```{r izsek.podatkov}
-source("podatki.R")
-source("porazdelitve.R")
-n<-100; mu1<-0; mu2<-2; ro<-0.4; b1<-6; b2<-2
-
 kable(head(podatki), booktabs=T, caption="Izsek iz tabele podatkov") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
@@ -107,7 +106,7 @@ Poglejmo si, kakšni sta dobljeni ROC krivulji in kakšni sta pripradajoči AUC 
 plot.roc(podatki)
 auc.list <- get.AUC(podatki)
 auc1 <- auc.list$AUC1
-auc2 <- auc.list$AUC1
+auc2 <- auc.list$AUC2
 razlika_vzorec <- auc.list$razlika
 razmerje_vzorec <- auc.list$razmerje
 ```
@@ -154,7 +153,6 @@ Poglejmo si, kakšne rezultate dobimo na generiranih podatkih. Rezultate bomo za
 **Rezultati za Test 1 (permutiranje X1,X2 in razlika)**
 
 ```{r fig.cap="Porazdelitev testne statistike pod H_0 in rezultat testa za Test 1"}
-test1 <- testiraj(podatki, por1)
 plot.test(test1, iz=T, p.val=T)
 ```
 
@@ -163,7 +161,6 @@ Dobljena vrednost testne statistike je enaka `r test1$t`, izračunana p-vrednost
 **Rezultati za Test 2 (permutiranje y in razlika)**
 
 ```{r fig.cap="Porazdelitev testne statistike pod H_0 in rezultat testa za Test 2"}
-test2 <- testiraj(podatki, por2)
 plot.test(test2, iz=T, p.val=T)
 ```
 
@@ -172,7 +169,6 @@ Dobljena vrednost testne statistike je enaka kot v prejšnjem testu, torej `r te
 **Rezultati za Test 3 (permutiranje X1,X2 in razmerje)**
 
 ```{r fig.cap="Porazdelitev testne statistike pod H_0 in rezultat testa za Test 3"}
-test3 <- testiraj(podatki, por3)
 plot.test(test3, iz=T, p.val=T)
 ```
 
@@ -181,7 +177,6 @@ Dobljena vrednost testne statistike znaša `r test3$t`, izračunana p-vrednost p
 **Rezultati za Test 4 (permutiranje y in razmerje)**
 
 ```{r fig.cap="Porazdelitev testne statistike pod H_0 in rezultat testa za Test 3"}
-test4 <- testiraj(podatki, por4)
 plot.test(test4, iz=T, p.val=T)
 ```
 
@@ -196,11 +191,6 @@ Preverili bomo lastnosi vseh štirih testov, in izbrali tistega, ki je najbolj p
 Za preverjanje velikosti testa, bomo podatke simulirali pod ničelno hipotezo, ki pravi, da je AUC enaka za oba parametra. Za določitev velikosti testa, večkrat simuliramo podatke in izvedemo test, potem pa pogledamo delež zavrnjenih ničelnih hipotez, za katerega želimo, da je manjši ali enak stopnji značilnosti $\alpha=0.05$. 
 
 ```{r}
-
-source("lastnostiTestov.R")
-
-n <- 100; mu1 <- 0; mu2 <-2; ro <-0.4; b1 <- 3; b2 <- 3
-
 kable(head(velikosti), booktabs=T, caption="Velikosti testov") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
@@ -214,9 +204,6 @@ Za preverjanje moči testa, bomo podatke simulirali z pravimi vrednostmi, ki smo
 
 
 ```{r moci}
-# Določimo podatke pod HA
-n <- 100; mu1 <- 0; mu2 <-2; ro <-0.4; b1 <- 6; b2 <- 2
-
 kable(head(moci), booktabs=T, caption="Moči testov") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
