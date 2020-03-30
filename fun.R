@@ -143,7 +143,7 @@ plot.roc <- function(df){
 
 get.AUC <- function(df){
   
-  # Funkcija, ki na vzorcu iračuna več statistik
+  # Funkcija, ki na vzorcu izračuna več statistik
   #---------------------------------------------------------------------
   # INPUT: 
   #   df...vzorec s stolpci y, X1, X2
@@ -259,6 +259,4 @@ plot.test <- function(data, iz=TRUE, p.val=TRUE){
   }
   
 }
-
-
 
