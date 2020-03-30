@@ -57,7 +57,7 @@ Kot smo omenili že v uvodu, se bomo v sklopu naloge odločali med dvema različ
 
 Za testiranje hipotez bomo uporabljali permutacijski test. Permutacijski test je zelo splošen pristop za testiranje statističnih hipotez, saj nima predpostavk o porazdelitvah in je zato tudi zelo primeren, kadar podatki niso skladni s predpostavko o njihovi porazdelitvi. 
 
-Porazdelitev testne statistike je generirana iz podatkov samih ob ničelni hipotezi, ki predpostavlja, da so vsi možni pari dveh spremenljivk enako verjetni. To dosežemo tako, da podatke ene spremenljivke naključno porazdelimo, drugo spremenljivko pa fiksiramo. Na koncu pa primerjamo dobljeno vrednost testne statistike in iz generirane porazdelitve odčitamo p-vrednost.
+Porazdelitev testne statistike je generirana iz podatkov samih ob ničelni hipotezi, ki predpostavlja, da so vsi možni pari dveh spremenljivk enako verjetni. To dosežemo tako, da podatke ene spremenljivke naključno porazdelimo, drugo spremenljivko pa fiksiramo. Na koncu primerjamo dobljeno vrednost testne statistike in iz generirane porazdelitve odčitamo p-vrednost.
 
 Kaj več tukaj? Kaj se zgodi, če sta markerja odvisna, ali je to treba kaj upoštevati
 
@@ -67,7 +67,7 @@ Raziskovalec v medicini bi rad s pomočjo vrednosti v krvi (markerji) napovedova
 
 ## Generiranje in pregled podatkov
 
-Radi bi zgenerirali neke dejanske podatke za naš primer. Potrebujemo torej dva markerja, ki sta medsebojno odvisna in ki imata različen vpliv na to, ali ima posameznik bolezen ali ne. 
+Radi bi zgenerirali neke dejanske podatke za naš primer. Potrebujemo torej dva markerja, ki sta medsebojno odvisna in imata različen vpliv na to, ali ima posameznik bolezen ali ne. 
 
 Določimo, da markerja prihajata iz multivariatne normalne porazdelitve
 
@@ -85,12 +85,12 @@ kjer smo z $\rho$ označili korelacijo med markerjema. Velja torej:
 * $X_1 \sim N(0,1)$
 * $X_2 \sim N(2,1)$
 
-Ko določimo porazdelitvi markerjev, določimo še kako vplivata na to, ali ima posameznik bolezen, ali ne. To shranimo v spremenljivko $Y$, ki jo generiramo kot linearno kombinacijo markerjev, kjer s pomočjo koeficientov določimo, kako močno je posamezen marker povezan z prisotnostjo bolezni. V našem primeru bomo $Y$ generirali kot:
+Ko določimo porazdelitvi markerjev, določimo še, kako vplivata na to, ali ima posameznik bolezen ali ne. To shranimo v spremenljivko $Y$, ki jo generiramo kot linearno kombinacijo markerjev, kjer s pomočjo koeficientov določimo, kako močno je posamezen marker povezan z prisotnostjo bolezni. V našem primeru bomo $Y$ generirali kot:
 
 $$Y=6X_1+2X_2+\epsilon,$$
-kjer je $\epsilon$ napaka, ki je porazdeljena standardno normalno. Vrednosti pretvorimo v $0$ in $1$ tako, da si pogledamo večji vzorec ($10000$ enot) in na podlagi tega določimo mejno vrednost $Y$ tako, da bo polovica posameznikov imelo bolezen in polovica ne. To naredimo tako, da na velikem vzorcu izračunamo mediano spremenljivke $Y$ in vse vrednosti, ki so manjše od mediane postavimo na $0$ (nima bolezni) ter vse, ki so večje od mediane postavimo na $1$ (ima bolezen). 
+kjer je $\epsilon$ napaka, ki je porazdeljena standardno normalno. Vrednosti pretvorimo v $0$ in $1$ tako, da si pogledamo večji vzorec ($10000$ enot) in na podlagi tega določimo mejno vrednost $Y$ tako, da bo polovica posameznikov imela bolezen in polovica ne. To naredimo tako, da na velikem vzorcu izračunamo mediano spremenljivke $Y$ in vse vrednosti, ki so manjše od mediane, postavimo na $0$ (nima bolezni) ter vse, ki so večje od mediane, postavimo na $1$ (ima bolezen). 
 
-V spodnji tabeli tako je primer prvih nekaj vrstic tako generiranega vzorca, kjer je velikost vzorca enaka $100$.
+V spodnji tabeli je primer prvih nekaj vrstic tako generiranega vzorca, kjer je velikost vzorca enaka $100$.
 
 ```{r izsek.podatkov}
 source("podatki.R")
@@ -120,7 +120,7 @@ Iz ROC krivulje lahko vidimo, da je na naših podatkih Marker 1 boljši kot Mark
 
 ## Postavitev hipoteze in testiranje
 
-Želimo statistično preveriti, ali je eden izmed markerjev boljši kot drugi. Za testiranje bomo uporabili že prej opisani permutacijski test, ki pa ga bomo naredili na 4 različne načine, glede na to, katere stolpce bomo permutirali (prisotnost bolezni/vrednosti markerjev) in glede na to, katero mero bomo uporabili v ničelni in alternativni domnevi (razlika AUC ali razmerje AUC). Teste označimo z zaporednimi števili. Parametri oziroma definicije testov so prikazani v spodnji tabeli. 
+Želimo statistično preveriti, ali je eden izmed markerjev boljši kot drugi. Za testiranje bomo uporabili že prej opisani permutacijski test, ki pa ga bomo naredili na 4 različne načine. Načini se ločijo glede na to, katere stolpce bomo permutirali (prisotnost bolezni/vrednosti markerjev) in glede na to, katero mero bomo uporabili v ničelni in alternativni domnevi (razlika AUC ali razmerje AUC). Teste označimo z zaporednimi števili. Parametri oziroma definicije testov so prikazani v spodnji tabeli. 
 
 ```{r tabela.testov}
 testi <- data.frame("Permutiranje"=rep(c("X1,X2","y"),2),
@@ -140,7 +140,7 @@ $$H_0: AUC_1-AUC_2=0 \text{ (razlika je enaka 0)}$$
 
 Vrednost testne statistike na vzorcu je enaka $AUC_1-AUC_2=$ `r razlika_vzorec`.
 
-Pri permutacijskih testih, kjer imamo za testno statistiko razmerje AUC obeh markerjev (Test 3 in Test 4) pa je
+Pri permutacijskih testih, kjer imamo za testno statistiko razmerje AUC obeh markerjev (Test 3 in Test 4), pa je
 
 $$H_0: \frac{AUC_1}{AUC_2}=1 \text{ (razmerje je enako 1)}$$
 Vrednost testne statistike na vzorcu je enaka $\frac{AUC_1}{AUC_2}=$ `r razmerje_vzorec`.
