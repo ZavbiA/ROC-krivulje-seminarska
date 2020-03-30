@@ -25,9 +25,9 @@ V seminarski nalogi želimo prikazali uporabo ROC krivulj in kako nam pomagajo p
 
 ## ROC krivulje in AUC
 
-Za začetek si poglejmo, kaj so to ROC krivulje in kaj je mera AUC. ROC krivulje (ang.ROC curve - receiver operating characteristic curve) je grafični prikaz, ki prikazuje uspešnost klasifikacijskega modela pri vseh pragovih klasifikacije. Prikazuje dva parametra:
+Za začetek si poglejmo, kaj so to ROC krivulje in kaj je mera AUC. ROC krivulje (ang. curve - receiver operating characteristic curve) je grafični prikaz, ki prikazuje uspešnost klasifikacijskega modela pri vseh pragovih klasifikacije. Prikazuje dva parametra:
 
-* Stopnja resnično poztivnih (TPR - True positive rate)
+* Stopnja resnično pozitivnih (TPR - True positive rate)
 * Stopnja lažno pozitivnih (FPR - False positive rate)
 
 Definirajmo še kratice:
@@ -43,7 +43,7 @@ $$TPR = \frac{TP}{TP+FN}$$
 Stopnja lažno pozitivnih (FPR) pa kot:
 
 $$FPR = \frac{FP}{FP+TN}$$
-ROC krivulja nariše TPR v primerjavi z FPR, pri različnih pragovih klasifikacije. Z znižanjem praga za razvrstitev je več postavk opredeljenih kot pozitivnih, kar povečuje tako napačne kot resnične pozitivne. 
+ROC krivulja nariše TPR v primerjavi z FPR, pri različnih pragovih klasifikacije. Z nižanjem praga za razvrstitev je več postavk opredeljenih kot pozitivnih, kar povečuje tako napačne kot resnično pozitivne. 
 
 Neka slika ROC? 
 

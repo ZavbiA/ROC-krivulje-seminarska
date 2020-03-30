@@ -16,6 +16,7 @@ source("lib.r")
 ##  Funkcije za generiranje podatkov, risanje ROC in računanje AUC  --
 ##--------------------------------------------------------------------
 
+#funkcija za dolocanje meje na podatkih
 doloci.mejo <- function(mu1, mu2, ro, b1, b2){
   korelacije <- matrix(ro, nrow=2, ncol=2)
   diag(korelacije) <- 1
@@ -24,6 +25,7 @@ doloci.mejo <- function(mu1, mu2, ro, b1, b2){
   round(median(y))
 }
 
+#funkcija za generiranje podatkov
 get.data <- function(n, mu1, mu2, ro, b1, b2){
   korelacije <- matrix(ro, nrow=2, ncol=2)
   diag(korelacije) <- 1
@@ -36,6 +38,7 @@ get.data <- function(n, mu1, mu2, ro, b1, b2){
   return(data.frame(y,x))
 }
 
+#izrise obe ROC krivulji
 plot.roc <- function(df){
   pred1 <- prediction(df$X1, df$y) 
   perf1 <- performance(pred1,"tpr","fpr")
@@ -47,6 +50,7 @@ plot.roc <- function(df){
   legend(0.75,0.2,c('Marker 1','Marker 2'),col=c('orange','blue'),lwd=1)
 }
 
+# izracuna oba AUC-ja, vrne list(AUC1,AUC2,razlika,razmerje)
 get.AUC <- function(df){
   pred1 <- prediction(df$X1, df$y) 
   auc_ROCR1 <- performance(pred1, measure = "auc")
@@ -82,15 +86,16 @@ permutiraj <- function(df, perm.cols, m.type){
   for(i in perm.cols){
     df[, i] <- df[sample(1:nrow(df)), i]
   }
-  
   get.AUC(df)[m.type] %>% as.numeric()
 }
 
+#vrne porazdelitev testne statistike
 porazdelitev <- function(df, perm.cols, m.type, n=1000){
   porazdelitev <- replicate(n, permutiraj(df, perm.cols, m.type))
+  
   return(list("dist" = porazdelitev,
               "m.type" = m.type))
-}
+} #m.type = razlika ali razmerje, dist pa so dejanske vrednosti razlike/razmerja
   
 testiraj <- function(df, porazdelitev){
   test.stat <- get.AUC(df)[porazdelitev$m.type] %>% as.numeric()
@@ -100,7 +105,8 @@ testiraj <- function(df, porazdelitev){
   return(list("porazdelitev" = porazdelitev$dist,
               "t" = test.stat,
               "p" = p.vr))
-}
+} #porazdelitev vrne to kar vrne funkcija porazdelitev
+#t je originalna vrednost
 
 
 plot.test <- function(data, iz=FALSE, p.val=FALSE){
@@ -128,7 +134,7 @@ plot.test <- function(data, iz=FALSE, p.val=FALSE){
          cex = .8, col="red")
   }
   
-}
+} #izrise graf density vzorca, lahko se p-vrednost in kriticno obmocje
 
 
 ### PRIMER:
