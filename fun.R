@@ -210,7 +210,7 @@ testiraj <- function(df, perm.cols, m.type, n=1000){
   test.stat <- get.AUC(df)[m.type] %>% as.numeric()
   
   if (m.type=="razlika"){
-    p.vr <- sum(abs(porazdelitev) > test.stat)/length(porazdelitev)
+    p.vr <- sum(abs(porazdelitev) > abs(test.stat))/length(porazdelitev)
   }
   else{
     druga.meja = 1/test.stat
