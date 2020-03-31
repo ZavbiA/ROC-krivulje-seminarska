@@ -22,7 +22,6 @@ m <- 500 # Število simulacij za vsak test
 ## TESTI ZA GAMMA
 
 n<-100; b1<-6; b2<-2
-N <- 100 # Število simulacij za generiranje porazdelitev
 podatki.gamma <- get.data.gamma(n, b1, b2)
 
 test.gamma1 <- testiraj(podatki.gamma, perm.cols=c("X1","X2"), m.type="razlika", n=N)

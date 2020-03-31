@@ -113,6 +113,7 @@ get.data.gamma <- function(n, b1, b2){
 
   X1 = e1 + e3 # prvi marker
   X2 = e2 + e3 # drugi marker
+  x <- cbind(X1,X2)
   y <- b1*x[,1]+b2*x[,2] + rnorm(n,0,1)
   
   meja <- doloci.mejo.gamma(b1, b2)
