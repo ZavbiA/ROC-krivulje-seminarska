@@ -34,7 +34,7 @@ doloci.mejo <- function(mu1, mu2, ro, b1, b2){
   korelacije <- matrix(ro, nrow=2, ncol=2)
   diag(korelacije) <- 1
   x <- rmvnorm(n=10000, mean=c(mu1,mu2), sigma=korelacije)
-  y <- b1*x[,1]+b2*x[,2] + rnorm(n=10000,0,1)
+  y <- b1*x[,1]+b2*x[,2] + rnorm(n=10000,0,5)
   round(median(y))
 }
 
@@ -83,10 +83,13 @@ get.data <- function(n, mu1, mu2, ro, b1, b2){
   korelacije <- matrix(ro, nrow=2, ncol=2)
   diag(korelacije) <- 1
   x <- rmvnorm(n=n, mean=c(mu1,mu2), sigma=korelacije)
-  y <- b1*x[,1]+b2*x[,2] + rnorm(n,0,1)
+  y <- b1*x[,1]+b2*x[,2] + rnorm(n,0,5)
   meja <- doloci.mejo(mu1, mu2, ro, b1, b2)
-  y[y<meja] <- 0
-  y[y>=meja] <- 1
+  
+  zdravi <- y<meja
+  bolni <- y>=meja
+  y[zdravi] <- 0
+  y[bolni] <- 1
   
   return(data.frame(y,x))
 }
