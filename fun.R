@@ -186,10 +186,27 @@ permutiraj <- function(df, perm.cols, m.type){
   # OUTPUT:
   #   vrednost željene statistike (razmerje ali razlika AUC)
   #---------------------------------------------------------------------
-  for(i in perm.cols){
-    df[, i] <- df[sample(1:nrow(df)), i]
-  }
+  
+  if(length(perm.cols)>1){
+    
+    }
+  
+  #for(i in perm.cols){
+  #  df[, i] <- df[sample(1:nrow(df)), i]
+  #}
   get.AUC(df)[m.type] %>% as.numeric()
+}
+
+permutiraj2 <- function(df, m.type){
+  ### DRUGA MOŽNOST ZA PERMUTIRANJE
+  df_m <- df %>% reshape2::melt(id.vars=c("y"))
+  df_m <- as.data.table(df_m)
+  df_m[, variable := sample(variable), by = y] 
+  df_perm <- df_m %>% as.data.frame() 
+  df_perm$seq <- with(df_perm, ave(value, y, variable, FUN = seq_along))
+  df_perm <- reshape2::dcast(y + seq ~ variable, data = df_perm, value.var = "value")
+  df_perm$seq <- NULL
+  get.AUC(df)[m.type] %>% as.numeric()df
 }
   
 testiraj <- function(df, perm.cols, m.type, n=1000){
