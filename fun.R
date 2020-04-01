@@ -34,7 +34,7 @@ doloci.mejo <- function(mu1, mu2, ro, b1, b2){
   korelacije <- matrix(ro, nrow=2, ncol=2)
   diag(korelacije) <- 1
   x <- rmvnorm(n=10000, mean=c(mu1,mu2), sigma=korelacije)
-  y <- b1*x[,1]+b2*x[,2] + rnorm(n=10000,0,5)
+  y <- b1*x[,1]+b2*x[,2] + rnorm(n=10000,0,1)
   round(median(y))
 }
 
@@ -83,7 +83,7 @@ get.data <- function(n, mu1, mu2, ro, b1, b2){
   korelacije <- matrix(ro, nrow=2, ncol=2)
   diag(korelacije) <- 1
   x <- rmvnorm(n=n, mean=c(mu1,mu2), sigma=korelacije)
-  y <- b1*x[,1]+b2*x[,2] + rnorm(n,0,5)
+  y <- b1*x[,1]+b2*x[,2] + rnorm(n,0,1)
   meja <- doloci.mejo(mu1, mu2, ro, b1, b2)
   
   zdravi <- y<meja
@@ -175,7 +175,7 @@ get.AUC <- function(df){
 ##                Funkcije za testiranje - TESTI                --
 ##----------------------------------------------------------------
 
-permutiraj <- function(df, perm.cols, m.type){
+permutiraj2 <- function(df, perm.cols, m.type){
   
   # Funkcija, ki na vzorcu permutira podatke in vrne željeno statistiko
   #---------------------------------------------------------------------
@@ -197,7 +197,7 @@ permutiraj <- function(df, perm.cols, m.type){
   get.AUC(df)[m.type] %>% as.numeric()
 }
 
-permutiraj2 <- function(df, m.type){
+permutiraj <- function(df, perm.cols, m.type){
   ### DRUGA MOŽNOST ZA PERMUTIRANJE
   df_m <- df %>% reshape2::melt(id.vars=c("y"))
   df_m <- as.data.table(df_m)
@@ -206,7 +206,7 @@ permutiraj2 <- function(df, m.type){
   df_perm$seq <- with(df_perm, ave(value, y, variable, FUN = seq_along))
   df_perm <- reshape2::dcast(y + seq ~ variable, data = df_perm, value.var = "value")
   df_perm$seq <- NULL
-  get.AUC(df)[m.type] %>% as.numeric()df
+  get.AUC(df_perm)[m.type] %>% as.numeric()
 }
   
 testiraj <- function(df, perm.cols, m.type, n=1000){
