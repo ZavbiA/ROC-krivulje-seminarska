@@ -175,7 +175,7 @@ get.AUC <- function(df){
 ##                Funkcije za testiranje - TESTI                --
 ##----------------------------------------------------------------
 
-permutiraj2 <- function(df, perm.cols, m.type){
+#permutiraj2 <- function(df, perm.cols, m.type){
   
   # Funkcija, ki na vzorcu permutira podatke in vrne željeno statistiko
   #---------------------------------------------------------------------
@@ -187,28 +187,42 @@ permutiraj2 <- function(df, perm.cols, m.type){
   #   vrednost željene statistike (razmerje ali razlika AUC)
   #---------------------------------------------------------------------
   
-  if(length(perm.cols)>1){
+  #if(length(perm.cols)>1){
     
-    }
+    #}
   
   #for(i in perm.cols){
   #  df[, i] <- df[sample(1:nrow(df)), i]
   #}
-  get.AUC(df)[m.type] %>% as.numeric()
-}
+  #get.AUC(df)[m.type] %>% as.numeric()
+#}
+
+# permutiraj <- function(df, perm.cols, m.type){
+#   ### DRUGA MOŽNOST ZA PERMUTIRANJE (MEŠAMO ZNOTRAJ BOLNIH IN ZNOTRAJ ZDRAVIH)
+#   df_m <- df %>% reshape2::melt(id.vars=c("y"))
+#   df_m <- as.data.table(df_m)
+#   df_m[, variable := sample(variable), by = y] 
+#   df_perm <- df_m %>% as.data.frame() 
+#   df_perm$seq <- with(df_perm, ave(value, y, variable, FUN = seq_along))
+#   df_perm <- reshape2::dcast(y + seq ~ variable, data = df_perm, value.var = "value")
+#   df_perm$seq <- NULL
+#   get.AUC(df_perm)[m.type] %>% as.numeric()
+# }
 
 permutiraj <- function(df, perm.cols, m.type){
-  ### DRUGA MOŽNOST ZA PERMUTIRANJE
-  df_m <- df %>% reshape2::melt(id.vars=c("y"))
-  df_m <- as.data.table(df_m)
-  df_m[, variable := sample(variable), by = y] 
-  df_perm <- df_m %>% as.data.frame() 
-  df_perm$seq <- with(df_perm, ave(value, y, variable, FUN = seq_along))
-  df_perm <- reshape2::dcast(y + seq ~ variable, data = df_perm, value.var = "value")
-  df_perm$seq <- NULL
+  ### mešamo markerja za vsako osebo posebej
+  df_perm <- df
+  if (length(perm.cols)>1){
+    for (j in (1:nrow(df))){
+      df_perm[j,2:3] <- df_perm[j,sample(2:3)]
+    }
+  }
+  else{
+    df_perm[,1] <- df_perm[sample(1:nrow(df)),1]
+  }
   get.AUC(df_perm)[m.type] %>% as.numeric()
 }
-  
+
 testiraj <- function(df, perm.cols, m.type, n=1000){
   
   # Funkcija, ki zgenerira porazdelitev pod ničelno domnevo (permutacije)
