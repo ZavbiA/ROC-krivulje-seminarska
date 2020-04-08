@@ -92,4 +92,4 @@ moci <- data.frame("Moc testa" = c(moc1,moc2,moc3,moc4),
 
 
 dump(c("podatki","test1","test2","test3","test4",
-       "velikosti","moci"), "rezultati_normal.R")
+       "velikosti","moci"), "rezultati_razlicna_porazdelitev.R")
