@@ -34,6 +34,9 @@ test4 <- testiraj(podatki, perm.cols=c("y"), m.type="razmerje", n=N)
 ##                 Velikost testa NORMAL-beta                   --
 ##----------------------------------------------------------------
 
+# Simulacije enake kot pri sim_enaka porazdelitev,
+# zato bi lahko rezultate samo kopirali od tam.
+
 # Podatki pod H0
 mu1 <- 0; mu2 <-0; ro <-0.4; b1 <- 3; b2 <- 3
 
