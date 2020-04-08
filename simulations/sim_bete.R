@@ -20,7 +20,7 @@ m <- 500 # Število simulacij za vsak test
 
 
 ## TESTI ZA NORMALNE PODATKE
-mu1<-0; mu2<-2; ro<-0.4; b1<-6; b2<-5
+mu1<-0; mu2<-0; ro<-0.4; b1<-6; b2<-5
 
 podatki <- get.data(n, mu1, mu2, ro, b1, b2)
 
@@ -35,7 +35,7 @@ test4 <- testiraj(podatki, perm.cols=c("y"), m.type="razmerje", n=N)
 ##----------------------------------------------------------------
 
 # Podatki pod H0
-mu1 <- 0; mu2 <-2; ro <-0.4; b1 <- 3; b2 <- 3
+mu1 <- 0; mu2 <-0; ro <-0.4; b1 <- 3; b2 <- 3
 
 # Test 1
 pvred1 <- replicate(m,testiraj(get.data(n, mu1, mu2, ro, b1, b2),
@@ -65,7 +65,7 @@ velikosti <- data.frame("Velikost" = c(vel1,vel2,vel3,vel4),
 ##---------------------------------------------------------------
 
 # Podatki pod H1 (isti kot prej)
-mu1 <- 0; mu2 <-2; ro <-0.4; b1 <- 6; b2 <- 5
+mu1 <- 0; mu2 <-0; ro <-0.4; b1 <- 6; b2 <- 5
 
 # Test 1
 pvred1 <- replicate(m,testiraj(get.data(n, mu1, mu2, ro, b1, b2),
