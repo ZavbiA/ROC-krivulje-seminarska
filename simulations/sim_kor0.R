@@ -20,7 +20,7 @@ m <- 500 # Število simulacij za vsak test
 ## TESTI ZA NORMALNE PODATKE
 mu1<-0; mu2<-0; ro<-0; b1<-6; b2<-2
 
-podatki.kor0 <- get.data(n, mu1, mu2, ro, b1, b2)
+podatki <- get.data(n, mu1, mu2, ro, b1, b2)
 
 test.kor01 <- testiraj(podatki, perm.cols=c("X1","X2"), m.type="razlika", n=N)
 test.kor02 <- testiraj(podatki, perm.cols=c("y"), m.type="razlika", n=N)
