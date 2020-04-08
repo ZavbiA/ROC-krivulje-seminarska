@@ -92,8 +92,3 @@ moci.kor0 <- data.frame("Moc testa" = c(moc1,moc2,moc3,moc4),
 dump(c("podatki.kor0","test1.kor0","test2.kor0","test3.kor0","test4.kor0",
        "velikosti.kor0","moci.kor0"), "rezultati_kor0.R")
 
-
-
-
-
-
