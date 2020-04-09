@@ -62,6 +62,30 @@ doloci.mejo.gamma <- function(b1, b2){
   round(median(y))
 }
 
+doloci.mejo.pois <- function(b1, b2){
+  
+  # Funkcija za dolocanje meje na podatkih za Poissonovo porazd.
+  # (uporablja se znotraj generiranja podatkov)
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   b1...vpliv na bolezen za marker 1
+  #   b2...vpliv na bolezen za marker 2
+  # OUTPUT:
+  #   meja (int) za določitev bolezni
+  #---------------------------------------------------------------------
+  
+  # vsota Poissonovih je spet Poissonova
+  e1 = rpois(10000, 1)
+  e2 = rpois(10000, 1)
+  e3 = rpois(10000, 1)
+  
+  X1 = e1 + e3 # prvi marker ~ Pois(2)
+  X2 = e2 + e3 # drugi marker ~ Pois(2)
+  x <- cbind(X1,X2)
+  y <- b1*x[,1]+b2*x[,2] + rnorm(n=10000,0,1)
+  round(median(y))
+}
+
 
 get.data <- function(n, mu1, mu2, ro, b1, b2){
   
@@ -127,6 +151,37 @@ get.data.gamma <- function(n, b1, b2){
   return(data.frame(y,x))
 }
 
+get.data.pois <- function(n, b1, b2){
+  
+  # Funkcija za generiranje vzorca - GAMMA PORAZDELITEV
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   n...velikost vzorca
+  #   ro...korelacijski faktor med markerjema
+  #   b1...vpliv na bolezen za marker 1
+  #   b2...vpliv na bolezen za marker 2
+  # OUTPUT:
+  #   tabela s stolpci:
+  #     y...binarna(0/1) označuje ali ima posameznik bolezen (0-zdrav,1-bolen)
+  #     X1...vrednost markerja 1
+  #     X2...vrednost markerja 2
+  #---------------------------------------------------------------------
+  
+  e1 = rpois(n, 1)
+  e2 = rpois(n, 1)
+  e3 = rpois(n, 1)
+  
+  X1 = e1 + e3 # prvi marker ~ Pois(2)
+  X2 = e2 + e3 # drugi marker ~ Pois(2)
+  x <- cbind(X1,X2)
+  y <- b1*x[,1]+b2*x[,2] + rnorm(n,0,1)
+  
+  meja <- doloci.mejo.pois(b1, b2)
+  y[y<meja] <- 0
+  y[y>=meja] <- 1
+  
+  return(data.frame(y,x))
+}
 
 plot.roc <- function(df){
   # Funkcija, ki izriše obe ROC krivulji
