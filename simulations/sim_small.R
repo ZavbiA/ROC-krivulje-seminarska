@@ -9,7 +9,7 @@
 source("lib.r")
 source("fun.r")
 
-n <- 30 # velikost vzorca
+n <- 20 # velikost vzorca
 N <- 1000 # Število simulacij za generiranje porazdelitev
 m <- 500 # Število simulacij za vsak test
 
