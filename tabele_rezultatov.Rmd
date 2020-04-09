@@ -1,0 +1,130 @@
+---
+title: "Tabele rezultatov simulacij"
+author: "Anja Žavbi Kunaver in Vesna Zupanc"
+date: "9 4 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+```{r}
+source("lib.R")
+```
+
+
+## Osnovni podatki (enaka porazdelitev)
+
+Oba markerja generirana iz $N(0,1)$, $\rho=0.4$, $\beta_1=6$, $\beta_2=5$, $n=100$.
+
+```{r}
+#library(htmlTable)
+#ibrary(xtable)
+#library(pander)
+source("results/rezultati_enaka_porazdelitev.R")
+tabela1 <- cbind(velikosti,moci)
+tabela1
+#tabela1 <- as.matrix(tabela1)
+#tabela1 <- table(tabela1)
+#kable(tabela1)
+```
+
+
+## Različni pričakovani vrednosti markerjev
+
+En marker generiran iz $N(0,1)$, drugi iz $N(2,1)$. $\rho=0.4$, $\beta_1=6$, $\beta_2=2$, $n=100$.
+
+```{r}
+source("results/rezultati_razlicna_porazdelitev.R")
+tabela2 <- cbind(velikosti,moci)
+tabela2
+#tabela1 <- as.matrix(tabela1)
+#tabela1 <- table(tabela1)
+#kable(tabela1)
+```
+
+## Neodvisna markerja
+
+Oba markerja generirana iz $N(0,1)$, $\rho=0$, $\beta_1=6$, $\beta_2=2$, $n=100$.
+
+```{r}
+source("results/rezultati_kor0.R")
+tabela3 <- cbind(velikosti.kor0,moci.kor0)
+tabela3
+#tabela1 <- as.matrix(tabela1)
+#tabela1 <- table(tabela1)
+#kable(tabela1)
+```
+
+## Velika koreliranost
+
+Oba markerja generirana iz $N(0,1)$, $\rho=0.9$, $\beta_1=6$, $\beta_2=2$, $n=100$.
+
+```{r}
+source("results/rezultati_kor0.9.R")
+tabela4 <- cbind(velikosti.kor09,moci.kor09)
+tabela4
+#tabela1 <- as.matrix(tabela1)
+#tabela1 <- table(tabela1)
+#kable(tabela1)
+```
+
+
+## Različni beti
+
+Oba markerja generirana iz $N(0,1)$, $\rho=0.4$, $\beta_1=6$, $\beta_2=5$, $n=100$.
+
+```{r}
+source("results/rezultati_bete.R")
+tabela5 <- cbind(velikosti,moci)
+tabela5
+#tabela1 <- as.matrix(tabela1)
+#tabela1 <- table(tabela1)
+#kable(tabela1)
+```
+
+## Majhen vzorec
+
+Oba markerja generirana iz $N(0,1)$, $\rho=0.4$, $\beta_1=6$, $\beta_2=2$, $n=20$.
+
+```{r}
+source("results/rezultati_small.R")
+tabela6 <- cbind(velikosti.small,moci.small)
+tabela6
+#tabela1 <- as.matrix(tabela1)
+#tabela1 <- table(tabela1)
+#kable(tabela1)
+```
+
+## Gamma porazdelitev
+
+Oba markerja generirana iz $\Gamma(2,2)$, $\rho=0.5$, $\beta_1=6$, $\beta_2=2$, $n=100$.
+
+```{r}
+source("results/rezultati_gamma.R")
+tabela7 <- cbind(velikosti.gamma,moci.gamma)
+tabela7
+#tabela1 <- as.matrix(tabela1)
+#tabela1 <- table(tabela1)
+#kable(tabela1)
+```
+
+# Ugotovitve
+
+* Test1 ima vedno največjo moč, z izjemo primera različnih porazdelitev markerjev (različnih pričakovanih vrednosti).
+
+* Test4 se izkaže za neprimeren test.
+
+* Ko mešamo po $Y$, s tem uničimo odvisnost med $X$ in $Y$. Zato testa 2 in 4 nista ustrezna?
+
+* Markerja morata očitno biti generirana iz enakih porazdelitev.
+
+* Permutacijski testi delujejo tako na odvisnih kot neodvisnih markerjih (sumljivo velike moči testov?).
+
+* Testi dobro delujejo tudi na manjših vzorcih. Porazdelitve markerjev ne rabijo biti normalne.
+
+* Če imata markerja zelo podoben vpliv na odzivno spremenljivko (majhna razlika med betama), so velikosti testov še vedno prave, moči pa se nekoliko zmanjšajo.
+
+* Kot najboljši test bi vzeli Test1.
+
