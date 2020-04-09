@@ -985,5 +985,5 @@ velikosti.small <-
 structure(list(Velikost = c(0.048, 0.004, 0.064, 0)), class = "data.frame", row.names = c("Test 1", 
 "Test 2", "Test 3", "Test 4"))
 moci.small <-
-structure(list(Moc.testa = c(0.362, 0.104, 0.288, NA)), class = "data.frame", row.names = c("Test 1", 
+structure(list(Moc.testa = c(0.362, 0.104, 0.288, 0)), class = "data.frame", row.names = c("Test 1", 
 "Test 2", "Test 3", "Test 4"))
