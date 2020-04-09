@@ -176,7 +176,7 @@ get.AUC <- function(df){
 ##                Funkcije za testiranje - TESTI                --
 ##----------------------------------------------------------------
 
-#permutiraj2 <- function(df, perm.cols, m.type){
+permutiraj2 <- function(df, perm.cols, m.type){
   
   # Funkcija, ki na vzorcu permutira podatke in vrne željeno statistiko
   #---------------------------------------------------------------------
@@ -188,15 +188,13 @@ get.AUC <- function(df){
   #   vrednost željene statistike (razmerje ali razlika AUC)
   #---------------------------------------------------------------------
   
-  #if(length(perm.cols)>1){
-    
-    #}
-  
-  #for(i in perm.cols){
-  #  df[, i] <- df[sample(1:nrow(df)), i]
-  #}
-  #get.AUC(df)[m.type] %>% as.numeric()
-#}
+  df_perm <- df
+  n <- nrow(df)
+  for(i in perm.cols){
+    df_perm[, i] <- df[sample(1:n), i]
+  }
+  get.AUC(df_perm)[m.type] %>% as.numeric()
+}
 
 # permutiraj <- function(df, perm.cols, m.type){
 #   ### DRUGA MOŽNOST ZA PERMUTIRANJE (MEŠAMO ZNOTRAJ BOLNIH IN ZNOTRAJ ZDRAVIH)
