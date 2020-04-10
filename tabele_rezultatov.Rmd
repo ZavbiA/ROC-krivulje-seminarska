@@ -44,14 +44,27 @@ tabela2
 #kable(tabela1)
 ```
 
+## Skoraj enaki pričakovani vrednosti markerjev
+
+En marker generiran iz $N(0,1)$, drugi iz $N(0.5,1)$. $\rho=0.4$, $\beta_1=6$, $\beta_2=2$, $n=100$.
+
+```{r}
+source("results/rezultati_skoraj_enaka_porazdelitev.R")
+tabela3 <- cbind(velikosti,moci)
+tabela3
+#tabela1 <- as.matrix(tabela1)
+#tabela1 <- table(tabela1)
+#kable(tabela1)
+```
+
 ## Neodvisna markerja
 
 Oba markerja generirana iz $N(0,1)$, $\rho=0$, $\beta_1=6$, $\beta_2=2$, $n=100$.
 
 ```{r}
 source("results/rezultati_kor0.R")
-tabela3 <- cbind(velikosti.kor0,moci.kor0)
-tabela3
+tabela4 <- cbind(velikosti.kor0,moci.kor0)
+tabela4
 #tabela1 <- as.matrix(tabela1)
 #tabela1 <- table(tabela1)
 #kable(tabela1)
@@ -63,22 +76,22 @@ Oba markerja generirana iz $N(0,1)$, $\rho=0.9$, $\beta_1=6$, $\beta_2=2$, $n=10
 
 ```{r}
 source("results/rezultati_kor0.9.R")
-tabela4 <- cbind(velikosti.kor09,moci.kor09)
-tabela4
+tabela5 <- cbind(velikosti.kor09,moci.kor09)
+tabela5
 #tabela1 <- as.matrix(tabela1)
 #tabela1 <- table(tabela1)
 #kable(tabela1)
 ```
 
 
-## Različni beti
+## Podobni beti
 
 Oba markerja generirana iz $N(0,1)$, $\rho=0.4$, $\beta_1=6$, $\beta_2=5$, $n=100$.
 
 ```{r}
 source("results/rezultati_bete.R")
-tabela5 <- cbind(velikosti,moci)
-tabela5
+tabela6 <- cbind(velikosti,moci)
+tabela6
 #tabela1 <- as.matrix(tabela1)
 #tabela1 <- table(tabela1)
 #kable(tabela1)
@@ -90,8 +103,8 @@ Oba markerja generirana iz $N(0,1)$, $\rho=0.4$, $\beta_1=6$, $\beta_2=2$, $n=20
 
 ```{r}
 source("results/rezultati_small.R")
-tabela6 <- cbind(velikosti.small,moci.small)
-tabela6
+tabela7 <- cbind(velikosti.small,moci.small)
+tabela7
 #tabela1 <- as.matrix(tabela1)
 #tabela1 <- table(tabela1)
 #kable(tabela1)
@@ -103,8 +116,21 @@ Oba markerja generirana iz $\Gamma(2,2)$, $\rho=0.5$, $\beta_1=6$, $\beta_2=2$, 
 
 ```{r}
 source("results/rezultati_gamma.R")
-tabela7 <- cbind(velikosti.gamma,moci.gamma)
-tabela7
+tabela8 <- cbind(velikosti.gamma,moci.gamma)
+tabela8
+#tabela1 <- as.matrix(tabela1)
+#tabela1 <- table(tabela1)
+#kable(tabela1)
+```
+
+## Poissonova porazdelitev
+
+Oba markerja generirana iz $Pois(2)$, $\rho=0.5$, $\beta_1=6$, $\beta_2=2$, $n=100$.
+
+```{r}
+source("results/rezultati_diskretna.R")
+tabela9 <- cbind(velikosti.pois,moci.pois)
+tabela9
 #tabela1 <- as.matrix(tabela1)
 #tabela1 <- table(tabela1)
 #kable(tabela1)
@@ -124,7 +150,11 @@ tabela7
 
 * Testi dobro delujejo tudi na manjših vzorcih. Porazdelitve markerjev ne rabijo biti normalne.
 
-* Če imata markerja zelo podoben vpliv na odzivno spremenljivko (majhna razlika med betama), so velikosti testov še vedno prave, moči pa se nekoliko zmanjšajo.
+* Če imata markerja zelo podoben vpliv na odzivno spremenljivko (majhna razlika med betama), so velikosti testov še vedno prave, moči pa se zelo zmanjšajo.
 
-* Kot najboljši test bi vzeli Test1.
+* Bolj kot sta si markerja različna, manjši sta velikosti testov, kjer permutiramo po markerjih.
+
+* Kot najboljši test bi vzeli Test1. Ta test je zelo konstanten. Zmoti ga edino različna porazdelitev markerjev.
+
+
 

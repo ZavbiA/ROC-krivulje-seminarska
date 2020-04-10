@@ -387,6 +387,15 @@ summary {
 ## Test 3    0.000     0.330
 ## Test 4    0.000     0.144</code></pre>
 </div>
+<div id="skoraj-enaki-pričakovani-vrednosti-markerjev" class="section level2">
+<h2>Skoraj enaki pričakovani vrednosti markerjev</h2>
+<p>En marker generiran iz <span class="math inline">\(N(0,1)\)</span>, drugi iz <span class="math inline">\(N(0.5,1)\)</span>. <span class="math inline">\(\rho=0.4\)</span>, <span class="math inline">\(\beta_1=6\)</span>, <span class="math inline">\(\beta_2=2\)</span>, <span class="math inline">\(n=100\)</span>.</p>
+<pre><code>##        Velikost Moc.testa
+## Test 1    0.036     0.956
+## Test 2    0.012     0.896
+## Test 3    0.020     0.964
+## Test 4    0.000     0.164</code></pre>
+</div>
 <div id="neodvisna-markerja" class="section level2">
 <h2>Neodvisna markerja</h2>
 <p>Oba markerja generirana iz <span class="math inline">\(N(0,1)\)</span>, <span class="math inline">\(\rho=0\)</span>, <span class="math inline">\(\beta_1=6\)</span>, <span class="math inline">\(\beta_2=2\)</span>, <span class="math inline">\(n=100\)</span>.</p>
@@ -405,8 +414,8 @@ summary {
 ## Test 3    0.052     0.476
 ## Test 4    0.000     0.000</code></pre>
 </div>
-<div id="različni-beti" class="section level2">
-<h2>Različni beti</h2>
+<div id="podobni-beti" class="section level2">
+<h2>Podobni beti</h2>
 <p>Oba markerja generirana iz <span class="math inline">\(N(0,1)\)</span>, <span class="math inline">\(\rho=0.4\)</span>, <span class="math inline">\(\beta_1=6\)</span>, <span class="math inline">\(\beta_2=5\)</span>, <span class="math inline">\(n=100\)</span>.</p>
 <pre><code>##        Velikost Moc.testa
 ## Test 1    0.052     0.120
@@ -432,6 +441,15 @@ summary {
 ## Test 3    0.048     0.924
 ## Test 4    0.000     0.074</code></pre>
 </div>
+<div id="poissonova-porazdelitev" class="section level2">
+<h2>Poissonova porazdelitev</h2>
+<p>Oba markerja generirana iz <span class="math inline">\(Pois(2)\)</span>, <span class="math inline">\(\rho=0.5\)</span>, <span class="math inline">\(\beta_1=6\)</span>, <span class="math inline">\(\beta_2=2\)</span>, <span class="math inline">\(n=100\)</span>.</p>
+<pre><code>##        Velikost Moc.testa
+## Test 1    0.050     0.902
+## Test 2    0.004     0.686
+## Test 3    0.038     0.894
+## Test 4    0.000     0.024</code></pre>
+</div>
 <div id="ugotovitve" class="section level1">
 <h1>Ugotovitve</h1>
 <ul>
@@ -441,8 +459,9 @@ summary {
 <li><p>Markerja morata očitno biti generirana iz enakih porazdelitev.</p></li>
 <li><p>Permutacijski testi delujejo tako na odvisnih kot neodvisnih markerjih (sumljivo velike moči testov?).</p></li>
 <li><p>Testi dobro delujejo tudi na manjših vzorcih. Porazdelitve markerjev ne rabijo biti normalne.</p></li>
-<li><p>Če imata markerja zelo podoben vpliv na odzivno spremenljivko (majhna razlika med betama), so velikosti testov še vedno prave, moči pa se nekoliko zmanjšajo.</p></li>
-<li><p>Kot najboljši test bi vzeli Test1.</p></li>
+<li><p>Če imata markerja zelo podoben vpliv na odzivno spremenljivko (majhna razlika med betama), so velikosti testov še vedno prave, moči pa se zelo zmanjšajo.</p></li>
+<li><p>Bolj kot sta si markerja različna, manjši sta velikosti testov, kjer permutiramo po markerjih.</p></li>
+<li><p>Kot najboljši test bi vzeli Test1. Ta test je zelo konstanten. Zmoti ga edino različna porazdelitev markerjev.</p></li>
 </ul>
 </div>
 
