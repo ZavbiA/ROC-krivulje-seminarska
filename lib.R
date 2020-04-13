@@ -12,3 +12,6 @@ library(mvtnorm)
 library(ROCR)
 library(kableExtra)
 library(data.table)
+library(parallel)
+
+

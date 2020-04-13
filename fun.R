@@ -227,41 +227,150 @@ get.AUC <- function(df){
        "razmerje" = auc_ROCR1/auc_ROCR2)
 }
 
+
+auroc <- function(x, y) {
+  # Funkcija, ki na podlagi podatkov izračuna AUC (veliko hitrejša od get.AUC)
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   x...vredosti markerja
+  #   y...BOOL vektor, bolezni
+  # OUTPUT:
+  #   auc vrednost
+  #---------------------------------------------------------------------
+  n1 <- sum(!y)
+  n2 <- sum(y)
+  U  <- sum(rank(x)[!y]) - n1 * (n1 + 1) / 2
+  return(1 - U / n1 / n2)
+}
+
+
+
 ##----------------------------------------------------------------
 ##                Funkcije za testiranje - TESTI                --
 ##----------------------------------------------------------------
 
-permutiraj2 <- function(df, perm.cols, m.type){
+testiraj.rank.X <- function(df, m.type, n.perm=1000){
   
-  # Funkcija, ki na vzorcu permutira podatke in vrne željeno statistiko
+  # Funkcija, ki zgenerira porazdelitev pod ničelno domnevo (permutacije) glede na RANKE
+  # permutacije po markerjih
   #---------------------------------------------------------------------
   # INPUT: 
   #   df...vzorec s stolpci y, X1, X2
-  #   perm.cols...katere vrednosti permutiramo. Možni: c("y") ali c("X1","X2")
   #   m.type...Kaj računamo. Možni: "razlika"/"razmerje"
+  #   n.perm...število permutacij za generiranje porazdelitve
   # OUTPUT:
-  #   vrednost željene statistike (razmerje ali razlika AUC)
+  #   list (3) z elementi:
+  #     porazdelitev...vektor dolžine n, dobljena porazdelitev testne stat.
+  #     t...vrednost testne statistike na vzorcu
+  #     p...vrednost p
   #---------------------------------------------------------------------
   
-  df_perm <- df
-  n <- nrow(df)
-  for(i in perm.cols){
-    df_perm[, i] <- df[sample(1:n), i]
+  y <- df$y
+  m1 <- rank(df$X1)
+  m2 <- rank(df$X2)
+  
+  if (m.type=="razlika"){
+    test.stat <- auroc(m1,y) - auroc(m2,y)
   }
-  get.AUC(df_perm)[m.type] %>% as.numeric()
-}
+  else{
+    test.stat <- auroc(m1,y)/auroc(m2,y)
+  }
+  
+  n <- length(y)
+  
+  porazdelitev <- sapply(1:n.perm,function(i,n,m1,m2,y) {
+    # vzamemo M1 ali pa M2, čisto slučajno in izračunamo AUC
+    # premutiraj ima vrednost 1, kadar vzamemo prvi marker in 0 kadar drugi
+    premutiraj <- sample(c(0,1),n,replace=T)
+    pm1 <- premutiraj*m1 + (1-premutiraj)*m2
+    pm2 <- (1-premutiraj)*m1 + premutiraj*m2
+    if (m.type=="razlika"){
+      pp <- auroc(pm1,y) - auroc(pm2,y)
+    }
+    else{
+      pp <- auroc(pm1,y)/auroc(pm2,y)
+    }
+    pp
+  },n,m1,m2,y)
+  
+  if (m.type=="razlika"){
+    p.vr <- sum(abs(porazdelitev) > abs(test.stat))/n.perm
+  }
+  else{
+    druga.meja = 1/test.stat
+    zgornja = max(druga.meja,test.stat)
+    spodnja = min(druga.meja,test.stat)
+    p.vr <- (sum(porazdelitev > zgornja)+sum(porazdelitev < spodnja))/n.perm
+  }
+  
+  out <- list()
+  out$porazdelitev <- porazdelitev
+  out$t <- test.stat
+  out$p <- p.vr
+  class(out) <- "auc.rank.perm.X.test"
+  out
+} 
 
-# permutiraj <- function(df, perm.cols, m.type){
-#   ### DRUGA MOŽNOST ZA PERMUTIRANJE (MEŠAMO ZNOTRAJ BOLNIH IN ZNOTRAJ ZDRAVIH)
-#   df_m <- df %>% reshape2::melt(id.vars=c("y"))
-#   df_m <- as.data.table(df_m)
-#   df_m[, variable := sample(variable), by = y] 
-#   df_perm <- df_m %>% as.data.frame() 
-#   df_perm$seq <- with(df_perm, ave(value, y, variable, FUN = seq_along))
-#   df_perm <- reshape2::dcast(y + seq ~ variable, data = df_perm, value.var = "value")
-#   df_perm$seq <- NULL
-#   get.AUC(df_perm)[m.type] %>% as.numeric()
-# }
+testiraj.rank.y <- function(df, m.type, n.perm=1000){
+  
+  # Funkcija, ki zgenerira porazdelitev pod ničelno domnevo (permutacije) glede na RANKE
+  # permutacije po boleznih
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   df...vzorec s stolpci y, X1, X2
+  #   m.type...Kaj računamo. Možni: "razlika"/"razmerje"
+  #   n.perm...število permutacij za generiranje porazdelitve
+  # OUTPUT:
+  #   list (3) z elementi:
+  #     porazdelitev...vektor dolžine n, dobljena porazdelitev testne stat.
+  #     t...vrednost testne statistike na vzorcu
+  #     p...vrednost p
+  #---------------------------------------------------------------------
+  
+  y <- df$y
+  m1 <- rank(df$X1)
+  m2 <- rank(df$X2)
+  
+  if (m.type=="razlika"){
+    test.stat <- auroc(m1,y) - auroc(m2,y)
+  }
+  else{
+    test.stat <- auroc(m1,y)/auroc(m2,y)
+  }
+  
+  
+  n <- length(y)
+  
+  porazdelitev <- sapply(1:n.perm,function(i,n,m1,m2,y) {
+    # permutiramo po y
+    py <- y[sample(n)]
+    if (m.type=="razlika"){
+      pp <- auroc(m1,py) - auroc(m2,py)
+    }
+    else{
+      pp <- auroc(m1,py)/auroc(m2,py)
+    }
+    pp
+  },n,m1,m2,y)
+  
+  if (m.type=="razlika"){
+    p.vr <- sum(abs(porazdelitev) > abs(test.stat))/n.perm
+  }
+  else{
+    druga.meja = 1/test.stat
+    zgornja = max(druga.meja,test.stat)
+    spodnja = min(druga.meja,test.stat)
+    p.vr <- (sum(porazdelitev > zgornja)+sum(porazdelitev < spodnja))/n.perm
+  }
+  
+  out <- list()
+  out$porazdelitev <- porazdelitev
+  out$t <- test.stat
+  out$p <- p.vr
+  class(out) <- "auc.rank.perm.y.test"
+  out
+} 
+
 
 permutiraj <- function(df, perm.cols, m.type){
   ### mešamo markerja za vsako osebo posebej
