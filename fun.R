@@ -86,6 +86,25 @@ doloci.mejo.pois <- function(b1, b2){
   round(median(y))
 }
 
+doloci.mejo.razlicna <- function(b1, b2){
+  
+  # Funkcija za dolocanje meje na podatkih za Poissonovo porazd.
+  # (uporablja se znotraj generiranja podatkov)
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   b1...vpliv na bolezen za marker 1
+  #   b2...vpliv na bolezen za marker 2
+  # OUTPUT:
+  #   meja (int) za določitev bolezni
+  #---------------------------------------------------------------------
+  
+  X1 = rnorm(10000, 2, 1) # prvi marker ~ N(2,1)
+  X2 = rexp(10000, 1) # drugi marker ~ Exp(1)
+  x <- cbind(X1,X2)
+  y <- b1*x[,1]+b2*x[,2] + rnorm(n=10000,0,1)
+  round(median(y))
+}
+
 
 get.data <- function(n, mu1, mu2, ro, b1, b2){
   
@@ -182,6 +201,36 @@ get.data.pois <- function(n, b1, b2){
   
   return(data.frame(y,x))
 }
+
+get.data.razlicna <- function(n, b1, b2){
+  
+  # Funkcija za generiranje vzorca - RAZLIČNI PORAZDELITVI
+  #---------------------------------------------------------------------
+  # INPUT: 
+  #   n...velikost vzorca
+  #   b1...vpliv na bolezen za marker 1
+  #   b2...vpliv na bolezen za marker 2
+  # OUTPUT:
+  #   tabela s stolpci:
+  #     y...binarna(0/1) označuje ali ima posameznik bolezen (0-zdrav,1-bolen)
+  #     X1...vrednost markerja 1
+  #     X2...vrednost markerja 2
+  #---------------------------------------------------------------------
+  
+  X1 = rnorm(n, 2, 1) # prvi marker ~ N(2,1)
+  X2 = rexp(n, 1) # drugi marker ~ Exp(1)
+  x <- cbind(X1,X2)
+  y <- b1*x[,1]+b2*x[,2] + rnorm(n,0,1)
+  meja <- doloci.mejo.razlicna(b1, b2)
+  
+  zdravi <- y<meja
+  bolni <- y>=meja
+  y[zdravi] <- 0
+  y[bolni] <- 1
+  
+  return(data.frame(y,x))
+}
+
 
 plot.roc <- function(df){
   # Funkcija, ki izriše obe ROC krivulji
@@ -372,54 +421,54 @@ testiraj.rank.y <- function(df, m.type, n.perm=1000){
 } 
 
 
-permutiraj <- function(df, perm.cols, m.type){
-  ### mešamo markerja za vsako osebo posebej
-  df_perm <- df
-  if (length(perm.cols)>1){
-    for (j in (1:nrow(df))){
-      df_perm[j,2:3] <- df_perm[j,sample(2:3)]
-    }
-  }
-  else{
-    df_perm[,1] <- df_perm[sample(1:nrow(df)),1]
-  }
-  get.AUC(df_perm)[m.type] %>% as.numeric()
-}
+# permutiraj <- function(df, perm.cols, m.type){
+#   ### mešamo markerja za vsako osebo posebej
+#   df_perm <- df
+#   if (length(perm.cols)>1){
+#     for (j in (1:nrow(df))){
+#       df_perm[j,2:3] <- df_perm[j,sample(2:3)]
+#     }
+#   }
+#   else{
+#     df_perm[,1] <- df_perm[sample(1:nrow(df)),1]
+#   }
+#   get.AUC(df_perm)[m.type] %>% as.numeric()
+# }
 
-testiraj <- function(df, perm.cols, m.type, n=1000){
-  
-  # Funkcija, ki zgenerira porazdelitev pod ničelno domnevo (permutacije)
-  #---------------------------------------------------------------------
-  # INPUT: 
-  #   df...vzorec s stolpci y, X1, X2
-  #   perm.cols...katere vrednosti permutiramo. Možni: c("y") ali c("X1","X2")
-  #   m.type...Kaj računamo. Možni: "razlika"/"razmerje"
-  #   n...število permutacij za generiranje porazdelitve
-  # OUTPUT:
-  #   list (3) z elementi:
-  #     porazdelitev...vektor dolžine n, dobljena porazdelitev testne stat.
-  #     t...vrednost testne statistike na vzorcu
-  #     p...vrednost p
-  #---------------------------------------------------------------------
-  
-  porazdelitev <- replicate(n, permutiraj(df, perm.cols, m.type))
-  
-  test.stat <- get.AUC(df)[m.type] %>% as.numeric()
-  
-  if (m.type=="razlika"){
-    p.vr <- sum(abs(porazdelitev) > abs(test.stat))/length(porazdelitev)
-  }
-  else{
-    druga.meja = 1/test.stat
-    zgornja = max(druga.meja,test.stat)
-    spodnja = min(druga.meja,test.stat)
-    p.vr <- (sum(porazdelitev > zgornja)+sum(porazdelitev < spodnja))/length(porazdelitev)
-  }
-  
-  return(list("porazdelitev" = porazdelitev,
-              "t" = test.stat,
-              "p" = p.vr))
-} 
+# testiraj <- function(df, perm.cols, m.type, n=1000){
+#   
+#   # Funkcija, ki zgenerira porazdelitev pod ničelno domnevo (permutacije)
+#   #---------------------------------------------------------------------
+#   # INPUT: 
+#   #   df...vzorec s stolpci y, X1, X2
+#   #   perm.cols...katere vrednosti permutiramo. Možni: c("y") ali c("X1","X2")
+#   #   m.type...Kaj računamo. Možni: "razlika"/"razmerje"
+#   #   n...število permutacij za generiranje porazdelitve
+#   # OUTPUT:
+#   #   list (3) z elementi:
+#   #     porazdelitev...vektor dolžine n, dobljena porazdelitev testne stat.
+#   #     t...vrednost testne statistike na vzorcu
+#   #     p...vrednost p
+#   #---------------------------------------------------------------------
+#   
+#   porazdelitev <- replicate(n, permutiraj(df, perm.cols, m.type))
+#   
+#   test.stat <- get.AUC(df)[m.type] %>% as.numeric()
+#   
+#   if (m.type=="razlika"){
+#     p.vr <- sum(abs(porazdelitev) > abs(test.stat))/length(porazdelitev)
+#   }
+#   else{
+#     druga.meja = 1/test.stat
+#     zgornja = max(druga.meja,test.stat)
+#     spodnja = min(druga.meja,test.stat)
+#     p.vr <- (sum(porazdelitev > zgornja)+sum(porazdelitev < spodnja))/length(porazdelitev)
+#   }
+#   
+#   return(list("porazdelitev" = porazdelitev,
+#               "t" = test.stat,
+#               "p" = p.vr))
+# } 
 
 
 plot.test <- function(data, iz=TRUE, p.val=TRUE){
