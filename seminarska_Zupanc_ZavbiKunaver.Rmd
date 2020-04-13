@@ -28,7 +28,7 @@ V seminarski nalogi želimo prikazali uporabo ROC krivulj in kako nam pomagajo p
 
 ## ROC krivulje in AUC
 
-Za začetek si poglejmo, kaj so to ROC krivulje in kaj je mera AUC. ROC krivulje (ang. curve - receiver operating characteristic curve) je grafični prikaz, ki prikazuje uspešnost klasifikacijskega modela pri vseh pragovih klasifikacije. Prikazuje dva parametra:
+Za začetek si poglejmo, kaj so ROC krivulje in kaj je mera AUC. ROC krivulje (ang. curve - receiver operating characteristic curve) je grafični prikaz, ki prikazuje uspešnost klasifikacijskega modela pri vseh pragovih klasifikacije. Prikazuje dva parametra:
 
 * Stopnja resnično pozitivnih (TPR - True positive rate)
 * Stopnja lažno pozitivnih (FPR - False positive rate)
@@ -46,15 +46,15 @@ $$TPR = \frac{TP}{TP+FN}$$
 Stopnja lažno pozitivnih (FPR) pa kot:
 
 $$FPR = \frac{FP}{FP+TN}$$
-ROC krivulja nariše TPR v primerjavi z FPR, pri različnih pragovih klasifikacije. Z nižanjem praga za razvrstitev je več postavk opredeljenih kot pozitivnih, kar povečuje tako napačne kot resnično pozitivne. 
+ROC krivulja nariše TPR v primerjavi s FPR, pri različnih pragovih klasifikacije. Z nižanjem praga za razvrstitev je več postavk opredeljenih kot pozitivnih, kar povečuje tako lažno kot resnično pozitivne. 
 
 Neka slika ROC? 
 
-AUC (Area Under the ROC Curve) pa predstavlja ploščino pod ROC krivuljo in s tem predstavlja skupno merilo uspešnosti za vse možne pragove klasifikacije. Torej, ROC predstavlja verjetnostno krivuljo, AUC pa predstavlja stopnjo ali merilo ločljivosti. Pove nam, koliko model razlikuje med posameznimi razredi. Višji kot je AUC, boljši je model pri napovedovanju oziroma določanju razredov. 
+AUC (Area Under the ROC Curve) predstavlja ploščino pod ROC krivuljo in s tem predstavlja skupno merilo uspešnosti za vse možne pragove klasifikacije. ROC torej predstavlja verjetnostno krivuljo, AUC pa predstavlja stopnjo ali merilo ločljivosti. Pove nam, kako dobro model razlikuje med posameznimi razredi. Višji kot je AUC, boljši je model pri napovedovanju oziroma določanju razredov. 
 
-Primer takšnega klasifikacijskega problema je naprimer določanje bolnih in zdravih oseb na podlagi nekega markerja. V tem primeru visok AUC pomeni boljše razlikovanje med bolnimi in zdravimi, kar je običajno tudi naš cilj. 
+Primer takšnega klasifikacijskega problema je na primer določanje bolnih in zdravih oseb na podlagi nekega markerja. V tem primeru visok AUC pomeni boljše razlikovanje med bolnimi in zdravimi, kar je običajno tudi naš cilj. 
 
-Kot smo omenili že v uvodu, se bomo v sklopu naloge odločali med dvema različnima markerjema. Tudi v tem primeru, si želimo marker, ki ima višjo vrednost AUC. Na primer, da želimo da podlagi krvne preiskave določiti, ali mora neka oseba na nadaljne preiskave ali ne. Lahko bi namesto AUC za merilo kakovosti markerja vzeli samo stopnjo resnično pozitivnih primerov in jo maksimizirali. S pomočjo takega kriterija, bi najverjetneje zajeli večji delež bolnih, vendar pa se nam v tem primeru lahko zgodi, da bo na dodatnih presikavah tudi veliko zdravih ljudi. Tako je najboljša mera v takem primeru AUC, saj s tem preverjamo kako dobro nek marker loči med bolnimi in zdravimi. 
+Kot smo omenili že v uvodu, se bomo v sklopu naloge odločali med dvema različnima markerjema. Tudi v tem primeru si želimo marker, ki ima višjo vrednost AUC. Recimo, da želimo da podlagi krvne preiskave določiti, ali mora neka oseba na nadaljne preiskave ali ne. Lahko bi namesto AUC za merilo kakovosti markerja vzeli samo stopnjo resnično pozitivnih primerov in jo maksimizirali. S pomočjo takega kriterija, bi najverjetneje zajeli večji delež bolnih, vendar pa se nam v tem primeru lahko zgodi, da bo na dodatnih preiskavah tudi veliko zdravih ljudi. Tako je najboljša mera v takem primeru AUC, saj s tem preverjamo, kako dobro nek marker loči med bolnimi in zdravimi. 
 
 ## Permutacijski test
 
@@ -79,23 +79,24 @@ kjer je $\mu$ vektor povprečij in $\Sigma$ variančno-kovariančna matrika.
 
 Za nadalnje prikaze in testiranje bomo privzeli:
 
-* $\mu_1 = 0$ in $\mu_2 = 2$
+* $\mu_1 = \mu_2 = 0$
 * $\sigma_1 = \sigma_2 = 1$
 * $\rho = 0.4$ 
 
 kjer smo z $\rho$ označili korelacijo med markerjema. Velja torej:
 
 * $X_1 \sim N(0,1)$
-* $X_2 \sim N(2,1)$
+* $X_2 \sim N(0,1)$
 
 Ko določimo porazdelitvi markerjev, določimo še, kako vplivata na to, ali ima posameznik bolezen ali ne. To shranimo v spremenljivko $Y$, ki jo generiramo kot linearno kombinacijo markerjev, kjer s pomočjo koeficientov določimo, kako močno je posamezen marker povezan z prisotnostjo bolezni. V našem primeru bomo $Y$ generirali kot:
 
 $$Y=6X_1+2X_2+\epsilon,$$
-kjer je $\epsilon$ napaka, ki je porazdeljena standardno normalno. Vrednosti pretvorimo v $0$ in $1$ tako, da si pogledamo večji vzorec ($10000$ enot) in na podlagi tega določimo mejno vrednost $Y$ tako, da bo polovica posameznikov imela bolezen in polovica ne. To naredimo tako, da na velikem vzorcu izračunamo mediano spremenljivke $Y$ in vse vrednosti, ki so manjše od mediane, postavimo na $0$ (nima bolezni) ter vse, ki so večje od mediane, postavimo na $1$ (ima bolezen). 
+kjer je $\epsilon$ napaka, ki je porazdeljena standardno normalno. Vrednosti pretvorimo v $0$ in $1$ tako, da si pogledamo večji vzorec ($10000$ enot) in na podlagi tega določimo mejno vrednost $Y$ tako, da bo približno polovica posameznikov imela bolezen in polovica ne. To naredimo tako, da na velikem vzorcu izračunamo mediano spremenljivke $Y$ in vse vrednosti, ki so manjše od mediane, postavimo na $0$ (nima bolezni) ter vse, ki so večje od mediane, postavimo na $1$ (ima bolezen). 
 
 V spodnji tabeli je primer prvih nekaj vrstic tako generiranega vzorca, kjer je velikost vzorca enaka $100$.
 
 ```{r izsek.podatkov}
+source("results/rezultati_enaka_porazdelitev.R")
 kable(head(podatki), booktabs=T, caption="Izsek iz tabele podatkov") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
@@ -113,13 +114,13 @@ razmerje_vzorec <- auc.list$razmerje
 
 Iz ROC krivulje lahko vidimo, da je na naših podatkih Marker 1 boljši kot Marker 2. Vrednosti AUC, torej velikosti ploščine pod ROC krivuljama pa sta:
 
-* $AUC_1$: `r auc1`
-* $AUC_2$: `r auc2`
+* $AUC_1$: `r round(auc1,3)`
+* $AUC_2$: `r round(auc2,3)`
 
 
 ## Postavitev hipoteze in testiranje
 
-Želimo statistično preveriti, ali je eden izmed markerjev boljši kot drugi. Za testiranje bomo uporabili že prej opisani permutacijski test, ki pa ga bomo naredili na 4 različne načine. Načini se ločijo glede na to, katere stolpce bomo permutirali (prisotnost bolezni/vrednosti markerjev) in glede na to, katero mero bomo uporabili v ničelni in alternativni domnevi (razlika AUC ali razmerje AUC). Teste označimo z zaporednimi števili. Parametri oziroma definicije testov so prikazani v spodnji tabeli. 
+Želimo statistično preveriti, ali je eden izmed markerjev boljši kot drugi. Za testiranje bomo uporabili že prej opisani permutacijski test, ki pa ga bomo naredili na 4 različne načine. Načini se ločijo glede na to, katere stolpce bomo permutirali (prisotnost bolezni/vrednosti markerjev) in glede na to, katero mero bomo uporabili za testno statistiko (razlika AUC ali razmerje AUC). Teste označimo z zaporednimi števili. Parametri oziroma definicije testov so prikazani v spodnji tabeli. 
 
 ```{r tabela.testov}
 testi <- data.frame("Permutiranje"=rep(c("X1,X2","y"),2),
@@ -135,20 +136,20 @@ kable(head(testi), booktabs=T, caption="Definicije testov") %>%
 Naša ničelna domneva je, da sta markerja enakovredna, oziroma, da sta njuni vrednosti AUC enaki.
 Pri permutacijskih testih, kjer imamo za testno statistiko razliko AUC obeh markerjev (Test 1 in Test 2) je 
 
-$$H_0: AUC_1-AUC_2=0 \text{ (razlika je enaka 0)}$$
+$$H_0: AUC_1-AUC_2=0 \text{ (razlika je enaka 0)}.$$
 
-Vrednost testne statistike na vzorcu je enaka $AUC_1-AUC_2=$ `r razlika_vzorec`.
+Vrednost testne statistike na vzorcu je enaka $AUC_1-AUC_2=$ `r round(razlika_vzorec,3)`.
 
 Pri permutacijskih testih, kjer imamo za testno statistiko razmerje AUC obeh markerjev (Test 3 in Test 4), pa je
 
-$$H_0: \frac{AUC_1}{AUC_2}=1 \text{ (razmerje je enako 1)}$$
-Vrednost testne statistike na vzorcu je enaka $\frac{AUC_1}{AUC_2}=$ `r razmerje_vzorec`.
+$$H_0: \frac{AUC_1}{AUC_2}=1 \text{ (razmerje je enako 1)}.$$
+Vrednost testne statistike na vzorcu je enaka $\frac{AUC_1}{AUC_2}=$ `r round(razmerje_vzorec,3)`.
 
 Vidimo, da so vsi testi dvostranski. Pri testiranju bomo povsod uporabljali stopnjo značilnosti $\alpha = 0.05$. 
 
 ### Rezultati testov
 
-Poglejmo si, kakšne rezultate dobimo na generiranih podatkih. Rezultate bomo za vsak test prikazali tudi grafično, da vidimo še dobljene porazdelitve testnih statistik pod ničelno domnevo. Na porazdelitvi bo s sivo barvo tudi prikazano kritično območje. 
+Poglejmo si, kakšne rezultate dobimo na generiranih podatkih. Rezultate bomo za vsak test prikazali tudi grafično, da vidimo še dobljene porazdelitve testnih statistik pod ničelno domnevo. Na porazdelitvi bo s sivo barvo prikazano tudi kritično območje. 
 
 **Rezultati za Test 1 (permutiranje X1,X2 in razlika)**
 
@@ -156,7 +157,7 @@ Poglejmo si, kakšne rezultate dobimo na generiranih podatkih. Rezultate bomo za
 plot.test(test1, iz=T, p.val=T)
 ```
 
-Dobljena vrednost testne statistike je enaka `r test1$t`, izračunana p-vrednost znaša `r test1$p`. Tudi iz slike lahko razberemo, da je testna statistika znotraj kritičnega območja, zato v tem primeru pri stopnji značilnosti $\alpha=0.05$ zavrnemo $H_0$ in rečemo, da obstaja statistično značilna razlika med AUC markerjev. Glede na to, da se testna statistika nahaja na desni strani, pa sklepamo, da velja $AUC_1>AUC_2$.
+Dobljena vrednost testne statistike je enaka `r round(test1$t,3)`, izračunana p-vrednost znaša `r test1$p`. Tudi iz slike lahko razberemo, da je testna statistika znotraj kritičnega območja, zato v tem primeru pri stopnji značilnosti $\alpha=0.05$ zavrnemo $H_0$ in rečemo, da obstaja statistično značilna razlika med AUC markerjev.
 
 **Rezultati za Test 2 (permutiranje y in razlika)**
 
@@ -164,7 +165,7 @@ Dobljena vrednost testne statistike je enaka `r test1$t`, izračunana p-vrednost
 plot.test(test2, iz=T, p.val=T)
 ```
 
-Dobljena vrednost testne statistike je enaka kot v prejšnjem testu, torej `r test2$t`, izračunana p-vrednost pa znaša `r test1$p`. Ponovno razberemo tako iz izračunanih vrednosti kot iz grafičnega prikaza, da je testna statistika znotraj kritičnega območja, zato pri stopnji značilnosti $\alpha=0.05$ zavrnemo $H_0$ in rečemo, da obstaja statistično značilna razlika med AUC markerjev. Glede na to, da se testna statistika nahaja na desni strani, pa sklepamo, da velja $AUC_1>AUC_2$.
+Dobljena vrednost testne statistike je enaka kot v prejšnjem testu, torej `r round(test2$t,3)`, izračunana p-vrednost pa znaša `r test1$p`. Ponovno razberemo tako iz izračunanih vrednosti kot iz grafičnega prikaza, da je testna statistika znotraj kritičnega območja, zato pri stopnji značilnosti $\alpha=0.05$ zavrnemo $H_0$ in rečemo, da obstaja statistično značilna razlika med AUC markerjev.
 
 **Rezultati za Test 3 (permutiranje X1,X2 in razmerje)**
 
@@ -172,7 +173,7 @@ Dobljena vrednost testne statistike je enaka kot v prejšnjem testu, torej `r te
 plot.test(test3, iz=T, p.val=T)
 ```
 
-Dobljena vrednost testne statistike znaša `r test3$t`, izračunana p-vrednost pa `r test1$p`. Kot vidimo, pri stopnji značilnosti $\alpha=0.05$ ne moremo zavrniti ničelne hipoteze.
+Dobljena vrednost testne statistike znaša `r round(test3$t,3)`, izračunana p-vrednost pa `r test1$p`. Kot vidimo, pri stopnji značilnosti $\alpha=0.05$ ponovno zavrnemo ničelno domnevo in trdimo, da obstaja statistično značilna razlika med AUC vrednostima markerjev.
 
 **Rezultati za Test 4 (permutiranje y in razmerje)**
 
@@ -180,7 +181,7 @@ Dobljena vrednost testne statistike znaša `r test3$t`, izračunana p-vrednost p
 plot.test(test4, iz=T, p.val=T)
 ```
 
-Dobljena vrednost testne statistike znaša `r test4$t`, izračunana p-vrednost pa `r test4$p`. Ponovno pri stopnji značilnosti $\alpha=0.05$ ne moremo zavrniti ničelne hipoteze.
+Dobljena vrednost testne statistike znaša `r round(test4$t,3)`, izračunana p-vrednost pa `r test4$p`. Tokrat pri stopnji statistične značilnosti $\alpha=0.05$ ne moremo zavrnit ničelne domneve.
 
 ## Lastnosti testov
 
@@ -188,256 +189,264 @@ Preverili bomo lastnosi vseh štirih testov, in izbrali tistega, ki je najbolj p
 
 ### Velikost testa
 
-Za preverjanje velikosti testa, bomo podatke simulirali pod ničelno hipotezo, ki pravi, da je AUC enaka za oba parametra. Za določitev velikosti testa, večkrat simuliramo podatke in izvedemo test, potem pa pogledamo delež zavrnjenih ničelnih hipotez, za katerega želimo, da je manjši ali enak stopnji značilnosti $\alpha=0.05$. 
+Za preverjanje velikosti testa bomo podatke simulirali pod ničelno hipotezo, ki pravi, da je AUC enaka za oba parametra. Torej izenačimo $\beta_1$ in $\beta_2$ in izid generiramo kot $Y=3*X_1+3*X_2+\epsilon$. Za določitev velikosti testa večkrat simuliramo podatke in izvedemo test, potem pa pogledamo delež zavrnjenih ničelnih hipotez, za katerega želimo, da je manjši ali enak stopnji značilnosti $\alpha=0.05$. 
 
 ```{r}
 kable(head(velikosti), booktabs=T, caption="Velikosti testov") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-Vse dobimo 0?!?!?
-
-
 ### Moč testa
 
-Za preverjanje moči testa, bomo podatke simulirali z pravimi vrednostmi, ki smo jih določili na začetku poglavja. Pogledali bomo, kakšno moč ima posamezen test, tako, da bomo podatke simulirali večkrat in na koncu izračunali delež zavrnjenih ničelnih hipotez, za katerega si seveda želimo, da je čimvečji.
-
+Za preverjanje moči testa bomo podatke simulirali s pravimi vrednostmi, ki smo jih določili na začetku poglavja. Pogledali bomo, kakšno moč ima posamezen test, tako da bomo podatke simulirali večkrat in na koncu izračunali delež zavrnjenih ničelnih hipotez. Za ta delež si seveda želimo, da je čimvečji.
 
 ```{r moci}
 kable(head(moci), booktabs=T, caption="Moči testov") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-------------------------------------------------------------------------------
-# Simulacije podatkov
-
-Poskusili sva z različnimi simulacijami podatkov. Če sva vzeli zelo velik vzorec, so p-vrednosti pri vseh štirih testih prišle enake 0, torej sva vedno zavrnili ničelno domnevo. Rezultati so pričakovani, saj sva podatke simulirali tako, da imata markerja različne AUC vrednosti in pri večjem vzorcu ničelno domnevo lažje zavrnemo. Na podlagi te ugotovitve sva se odločili za simulacije manjših vzorcev. Pri vsakem primeru natančno opiševa postopek generiranja podatkov.
-
-
 
 # Permutacijski testi
 
-Najprej narediva permutacijski test, kjer permutirava markerja in gledava razliko. Označiva ga kot test1.
+Permutacijske teste generiramo na štiri načine, in sicer glede na to, kaj permutiramo (markerja ali izid) in glede na to, ali gledamo razliko ali razmerje med AUC vrednostima. Kadar permutiramo po markerjih, naključno zamenjamo vrednosti prvega in drugega markerja za vsakega posameznika posebej. Na ta način pravzaprav mešamo med dvema stolpcema po vrsticah tabele. Vrednosti markerjev v vrstici torej zamenjamo ali pa ne.
+
+Najprej naredimo permutacijski test, kjer permutiramo markerja in gledamo razliko. Označimo ga kot test1.
+
+Za drugi permutacijski test (test2) permutiramo izid in gledamo razliko.
+
+Pri tretjem permutacijskem testu (test3) permutiramo markerja in gledamo razmerje.
+
+Za zadnji permutacijski test (test4) permutiramo izid in gledamo razmerje.
+
+# Primeri
+
+Teste preizkusimo na različno simuliranih podatkih. V osnovnem primeru sta oba markerja generirana iz standardno normalne porazdelitve ter medsebojno korelirana z $\rho=0.4$. Spremenljivka $Y$ je pokazatelj, ali ima posameznik bolezen ali ne, torej je porazdeljena Bernoullijevo. Generiramo jo kot linearno kombinacijo markerjev in sicer $Y = 6*X_1+2*X_2 + \epsilon$, kjer je $\epsilon$ napaka, ki je standardno normalno porazdeljena. Vrednosti pretvorimo v 0 in 1 tako, da je polovica vrednosti 1 (tiste z večjo vrednostjo od mediane) in polovica 0 (tiste z manjšo vrednostjo). Privzeta velikost vzorca je $n=100$. Pri vsakem primeru navedemo osnovni vrednosti AUC obeh markerjev ter posebnosti generiranja podatkov.
+
+## Osnovni podatki (enaka porazdelitev)
 
 ```{r}
-test1 <- function(x,y){
-  razlika = c()
-  for (k in 1:1000){
-    # Korak 1:
-    xp1<-x[sample(1:n),1] #permutacija x-a
-    xp2<-x[sample(1:n),2]
-    
-    # Korak 2:
-    #AUC = ploščina pod ROC krivuljo
-    df <- data.frame(xp1,y)
-    colnames(df) = c("predictions","labels")
-    pred <- prediction(df$predictions, df$labels)
-    auc_ROCR1 <- performance(pred, measure = "auc")
-    auc_ROCR1 <- auc_ROCR1@y.values[[1]]
-    
-    df <- data.frame(xp2,y)
-    colnames(df) = c("predictions","labels")
-    pred <- prediction(df$predictions, df$labels)
-    auc_ROCR2 <- performance(pred, measure = "auc")
-    auc_ROCR2 <- auc_ROCR2@y.values[[1]]
-    
-    razlika[k] = auc_ROCR1 - auc_ROCR2
-  }
-  hist(razlika, main="")
-  p.vrednost <<- sum(razlika>originalna_razlika)/1000
-}
+source("results/rezultati_enaka_porazdelitev.R")
+auc.list <- get.AUC(podatki)
+auc1 <- auc.list$AUC1
+auc2 <- auc.list$AUC2
+razlika_vzorec <- auc.list$razlika
+razmerje_vzorec <- auc.list$razmerje
 ```
 
-Za drugi permutacijski test (test2) permutirava izid in gledava razliko.
+V osnovnem primeru so podatki generirani, kot je bilo že opisano. Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
 
 ```{r}
-test2 <- function(x,y){
-  razlika = c()
-  for (k in 1:1000){
-    yp<-y[sample(1:n)] #permutacija y-a
-    
-    df <- data.frame(x[,1],yp)
-    colnames(df) = c("predictions","labels")
-    pred <- prediction(df$predictions, df$labels)
-    auc_ROCR1 <- performance(pred, measure = "auc")
-    auc_ROCR1 <- auc_ROCR1@y.values[[1]]
-    
-    df <- data.frame(x[,2],yp)
-    colnames(df) = c("predictions","labels")
-    pred <- prediction(df$predictions, df$labels)
-    auc_ROCR2 <- performance(pred, measure = "auc")
-    auc_ROCR2 <- auc_ROCR2@y.values[[1]]
-    
-    razlika[k] = auc_ROCR1 - auc_ROCR2
-  }
-  hist(razlika, main="")
-  p.vrednost <<- sum(razlika>originalna_razlika)/1000
-}
+tabela1 <- cbind(velikosti,moci)
+colnames(tabela1) <- c("Velikost", "Moc")
+kable(head(tabela1), booktabs=T, caption="Velikosti in moči testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-Pri tretjem permutacijskem testu (test3) permutirava markerja in gledava razmerje.
+
+## Različni pričakovani vrednosti markerjev
 
 ```{r}
-test3 <- function(x,y){
-  razmerje = c()
-  for (k in 1:1000){
-    xp1<-x[sample(1:n),1] #permutacija x-a
-    xp2<-x[sample(1:n),2]
-    
-    df <- data.frame(xp1,y)
-    colnames(df) = c("predictions","labels")
-    pred <- prediction(df$predictions, df$labels)
-    auc_ROCR1 <- performance(pred, measure = "auc")
-    auc_ROCR1 <- auc_ROCR1@y.values[[1]]
-    
-    df <- data.frame(xp2,y)
-    colnames(df) = c("predictions","labels")
-    pred <- prediction(df$predictions, df$labels)
-    auc_ROCR2 <- performance(pred, measure = "auc")
-    auc_ROCR2 <- auc_ROCR2@y.values[[1]]
-    
-    razmerje[k] = auc_ROCR1/auc_ROCR2
-  }
-  hist(razmerje, main="")
-  p.vrednost <<- sum(razmerje>originalno_razmerje)/1000
-}
+source("results/rezultati_razlicna_porazdelitev.R")
+auc.list <- get.AUC(podatki)
+auc1 <- auc.list$AUC1
+auc2 <- auc.list$AUC2
+razlika_vzorec <- auc.list$razlika
+razmerje_vzorec <- auc.list$razmerje
 ```
 
-Za zadnji permutacijski test (test4) permutirava izid in gledava razmerje.
+V drugem primeru sta markerja generirana iz normalne porazdelitve, vendar z različnima povprečjema: $X_1 \sim N(0,1)$ in $X_2\sim N(2,1)$. Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
 
 ```{r}
-test4 <- function(x,y){
-  razmerje = c()
-  for (k in 1:1000){
-    yp<-y[sample(1:n)] #permutacija y-a
-    
-    df <- data.frame(x[,1],yp)
-    colnames(df) = c("predictions","labels")
-    pred <- prediction(df$predictions, df$labels)
-    auc_ROCR1 <- performance(pred, measure = "auc")
-    auc_ROCR1 <- auc_ROCR1@y.values[[1]]
-    
-    df <- data.frame(x[,2],yp)
-    colnames(df) = c("predictions","labels")
-    pred <- prediction(df$predictions, df$labels)
-    auc_ROCR2 <- performance(pred, measure = "auc")
-    auc_ROCR2 <- auc_ROCR2@y.values[[1]]
-    
-    razmerje[k] = auc_ROCR1/auc_ROCR2
-  }
-  hist(razmerje, main="")
-  p.vrednost <<- sum(razmerje>originalno_razmerje)/1000
-}
+tabela2 <- cbind(velikosti,moci)
+colnames(tabela2) <- c("Velikost", "Moc")
+kable(head(tabela2), booktabs=T, caption="Velikosti in moči testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-# Primer 1
-
-## Simulacija podatkov
-
-Najprej sva se odločili za simulacijo vzorca velikosti 100. Markerja sva generirali iz normalne porazdelitve in sicer prvega iz $N(0,1)$ in drugega iz $N(2,1)$. Kovarianco med njima sva nastavili na 0.4. Spremenljivka $Y$ je pokazatelj, ali ima posameznik bolezen ali ne, torej je porazdeljena Bernoullijevo. Generirali sva jo kot linearno kombinacijo markerjev in sicer $Y = 6*X_1+2*X_2 + \epsilon$, kjer je $\epsilon$ napaka, ki je standardno normalno porazdeljena. Vrednosti sva pretvorili v 0 in 1 tako, da je polovica vrednosti 1 (tiste z večjo vrednostjo od mediane) in polovica 0 (tiste z manjšo vrednostjo).
-
-```{r fig.cap="ROC krivulji obeh markerjev"}
-n=100 #najprej vzemi velik n, nato lahko manjše vzorce (najprej sva probali z 10000)
-korelacije = matrix(0.4, nrow=2, ncol=2)
-diag(korelacije) = 1
-x <- rmvnorm(n=n, mean=c(0,2), sigma=korelacije)
-y = 6*x[,1]+2*x[,2] + rnorm(n,0,1)
-#median(y) #meja, od kje naprej so bolni, da jih je približno polovica
-meja=4
-y[y<meja] <- 0
-y[y>=meja] <- 1
-
-df <- data.frame(x[,1],y)
-colnames(df) = c("predictions","labels")
-pred <- prediction(df$predictions, df$labels)
-perf <- performance(pred,"tpr","fpr")
-plot(perf,col="orange")
-
-auc_ROCR1 <- performance(pred, measure = "auc")
-auc_ROCR1 <- auc_ROCR1@y.values[[1]] #želimo čim večjo vrednost
-
-df <- data.frame(x[,2],y)
-colnames(df) = c("predictions","labels")
-pred <- prediction(df$predictions, df$labels)
-perf <- performance(pred,"tpr","fpr")
-plot(perf,col="blue", add=TRUE)
-
-auc_ROCR2 <- performance(pred, measure = "auc")
-auc_ROCR2 <- auc_ROCR2@y.values[[1]]
-
-#shraniva za permutacijske teste
-originalna_razlika = auc_ROCR1 - auc_ROCR2
-originalno_razmerje = auc_ROCR1/auc_ROCR2
-```
+## Skoraj enaki pričakovani vrednosti markerjev
 
 ```{r}
-podatki <- cbind(x,y)
-colnames(podatki) = cbind("x1","x2","y")
-tabela1 <- head(podatki)
-kable(tabela1, caption="Izsek iz tabele podatkov")
+source("results/rezultati_skoraj_enaka_porazdelitev.R")
+auc.list <- get.AUC(podatki)
+auc1 <- auc.list$AUC1
+auc2 <- auc.list$AUC2
+razlika_vzorec <- auc.list$razlika
+razmerje_vzorec <- auc.list$razmerje
 ```
 
-## Preverjanje testne statistike pod ničelno domnevo
+V naslednjem primeru sta markerja generirana iz normalne porazdelitve z bolj podobnima povprečjema: $X_1 \sim N(0,1)$ in $X_2\sim N(0.5,1)$. Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
 
-Najprej preveriva porazdelitev testne statistike pod ničelno domnevo.
-
-```{r results=FALSE}
-y.test = 2*x[,1]+2*x[,2] + rnorm(n,0,1)
-#median(y.test) #meja, od kje naprej so bolni, da jih je približno polovica
-meja=4
-y.test[y.test<meja] <- 0
-y.test[y.test>=meja] <- 1
+```{r}
+tabela3 <- cbind(velikosti,moci)
+colnames(tabela3) <- c("Velikost", "Moc")
+kable(head(tabela3), booktabs=T, caption="Velikosti in moči testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-```{r fig.cap="Histogram vrednosti testne statistike pod H0 za test1"}
-#test1(x,y.test)
+## Neodvisna markerja
+
+```{r}
+source("results/rezultati_kor0.R")
+auc.list <- get.AUC(podatki)
+auc1 <- auc.list$AUC1
+auc2 <- auc.list$AUC2
+razlika_vzorec <- auc.list$razlika
+razmerje_vzorec <- auc.list$razmerje
 ```
 
-```{r fig.cap="Histrogram vrednosti testne statistike pod H0 za test2"}
-#test2(x,y.test)
+Preverimo, kakšne rezultate dobimo, če sta markerja med seboj neodvisna. Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+
+```{r}
+tabela4 <- cbind(velikosti.kor0,moci.kor0)
+colnames(tabela4) <- c("Velikost", "Moc")
+kable(head(tabela4), booktabs=T, caption="Velikosti in moči testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-```{r fig.cap="Histrogram vrednosti testne statistike pod H0 za test3"}
-#test3(x,y.test)
+## Velika koreliranost
+
+```{r}
+source("results/rezultati_kor0.9.R")
+auc.list <- get.AUC(podatki)
+auc1 <- auc.list$AUC1
+auc2 <- auc.list$AUC2
+razlika_vzorec <- auc.list$razlika
+razmerje_vzorec <- auc.list$razmerje
 ```
 
-```{r fig.cap="Histrogram vrednosti testne statistike pod H0 za test4"}
-#test4(x,y.test)
+Poglejmo še nasprotni primer od prejšnjega - zdaj sta markerja močno korelirana ($\rho=0.9$). Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+
+```{r}
+tabela5 <- cbind(velikosti.kor09,moci.kor09)
+colnames(tabela5) <- c("Velikost", "Moc")
+kable(head(tabela5), booktabs=T, caption="Velikosti in moči testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-Vidimo, da je porazdelitev testne statistike pri vseh štirih testih podobna normalni.??
+## Podobni beti
 
-## Rezultati testov
-
-```{r fig.cap="Porazdelitev testih statistik za simulacije test1"}
-#test1(x=x,y=y)
-#abline(v=originalna_razlika, col="red", add=TRUE)
+```{r}
+source("results/rezultati_bete.R")
+auc.list <- get.AUC(podatki)
+auc1 <- auc.list$AUC1
+auc2 <- auc.list$AUC2
+razlika_vzorec <- auc.list$razlika
+razmerje_vzorec <- auc.list$razmerje
 ```
 
-Dobljena p-vrednost za test1 je r round(p.vrednost,3).
+Preverimo, kaj se zgodi, ko sta si $\beta_1$ in $\beta_2$ bolj podobni ($\beta_1=6$ in $\beta_2=5$). Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
 
-```{r fig.cap="Porazdelitev testih statistik za simulacije test2"}
-#test2(x=x,y=y)
-#abline(v=originalna_razlika, col="red", add=TRUE)
+```{r}
+tabela6 <- cbind(velikosti,moci)
+colnames(tabela6) <- c("Velikost", "Moc")
+kable(head(tabela6), booktabs=T, caption="Velikosti in moči testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-Dobljena p-vrednost za test2 je r round(p.vrednost,3).
+## Podobni beti, neodvisna markerja
 
-```{r fig.cap="Porazdelitev testih statistik za simulacije test3"}
-#test3(x=x,y=y)
-#abline(v=originalno_razmerje, col="red", add=TRUE)
+```{r}
+source("results/rezultati_bete_neodvisna.R")
+auc.list <- get.AUC(podatki)
+auc1 <- auc.list$AUC1
+auc2 <- auc.list$AUC2
+razlika_vzorec <- auc.list$razlika
+razmerje_vzorec <- auc.list$razmerje
 ```
 
-Dobljena p-vrednost za test3 je r round(p.vrednost,3).
+Glede na to, da smo pri podobnih vrednostih $\beta_1$ in $\beta_2$ dobili majhne moči testov, pri neodvisnih markerjih pa zelo velike moči testov, poglejmo, kaj se zgodi, če uporabimo obe lastnosti podatkov hkrati (torej $\rho=0$, $\beta_1=6$ in $\beta_2=5$). Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
 
-```{r fig.cap="Porazdelitev testih statistik za simulacije test4"}
-#test4(x=x,y=y)
-#abline(v=originalno_razmerje, col="red", add=TRUE)
+```{r}
+tabela7 <- cbind(velikosti.bete.neodvisna,moci.bete.neodvisna)
+colnames(tabela7) <- c("Velikost", "Moc")
+kable(head(tabela7), booktabs=T, caption="Velikosti in moči testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-Dobljena p-vrednost za test4 je r round(p.vrednost,3).
+## Majhen vzorec
 
+```{r}
+source("results/rezultati_small.R")
+auc.list <- get.AUC(podatki.small)
+auc1 <- auc.list$AUC1
+auc2 <- auc.list$AUC2
+razlika_vzorec <- auc.list$razlika
+razmerje_vzorec <- auc.list$razmerje
+```
 
+V naslednjem primeru generiramo vzorec velikost $n=20$. Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+
+```{r}
+tabela8 <- cbind(velikosti.small,moci.small)
+colnames(tabela8) <- c("Velikost", "Moc")
+kable(head(tabela8), booktabs=T, caption="Velikosti in moči testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+```
+
+## Gamma porazdelitev
+
+```{r}
+source("results/rezultati_gamma.R")
+auc.list <- get.AUC(podatki.gamma)
+auc1 <- auc.list$AUC1
+auc2 <- auc.list$AUC2
+razlika_vzorec <- auc.list$razlika
+razmerje_vzorec <- auc.list$razmerje
+```
+
+Poglejmo še primer, ko markerja nista generirana iz normalne porazdelitve. Za začetek naj bosta oba oba generirana iz $\Gamma(2,2)$ ter medsebojno korelirana z $\rho=0.5$. Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+
+```{r}
+tabela9 <- cbind(velikosti.gamma,moci.gamma)
+colnames(tabela9) <- c("Velikost", "Moc")
+kable(head(tabela9), booktabs=T, caption="Velikosti in moči testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+```
+
+## Poissonova porazdelitev
+
+```{r}
+source("results/rezultati_skoraj_enaka_porazdelitev.R")
+auc.list <- get.AUC(podatki)
+auc1 <- auc.list$AUC1
+auc2 <- auc.list$AUC2
+razlika_vzorec <- auc.list$razlika
+razmerje_vzorec <- auc.list$razmerje
+```
+
+Za zaključek generiramo markerja iz diskretne porazdelitve. Naj bo $X_1 \sim Pois(2)$, $X_2 \sim Pois(2)$ in $\rho=0.5$. Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+
+```{r}
+source("results/rezultati_diskretna.R")
+tabela10 <- cbind(velikosti.pois,moci.pois)
+colnames(tabela10) <- c("Velikost", "Moc")
+kable(head(tabela10), booktabs=T, caption="Velikosti in moči testov") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+```
+
+# Ugotovitve
+
+Najprej sva poskusili s permutiranjem celotnih stolpcev markerjev, torej da v vsakem stolpcu naključno premešamo vse vrednosti. Pri tem sva vedno dobili velikosti prvega in tretjega testa (ko premutiramo po markerjih) enake nič. Ugotovili sva, da tako mešanje ni primerno, ker s tem uničimo odvisnost med markerjema in izidom. Poskusili sva tudi z mešanjem vrednosti znotraj skupin bolnih in zdravih, vendar v tem primeru prav tako delno uničimo odvisnost med markerji in izidom. Kot najboljše permutiranje sva izbrali permutiranje znotraj posamezne osebe - torej da za vsakega posameznika naključno zamenjamo vrednosti prvega in drugega markerja. Tako permutiranje se je izkazalo za uspešno, saj na ta način dobimo prave velikosti testov za prvi in tretji test. Ko permutiramo izid pa nimamo druge možnosti, kot da naključno premešamo celotni stolpec tabele. S tem izničimo odvisnost markerjev in izida, posledično test2 in test4 nista primerna za uporabo.
+
+Test1 ima vedno največjo moč, z izjemo primera različnih porazdelitev markerjev (različnih pričakovanih vrednosti). Ta test bi ocenili kot najboljši. Je zelo konstanten, zmoti ga edino različna porazdelitev markerjev.
+
+Ugotovili smo, da markerja morata biti generirana iz enakih porazdelitev, sicer velikosti testov 1 in 3 niso prave.
+Bolj kot sta si markerja različna, manjši sta velikosti testov, kjer permutiramo po markerjih. STANDARDIZACIJA/RANGI????
+
+Ko mešamo po $Y$, s tem uničimo odvisnost med $X$ in $Y$. Zato testa 2 in 4 nista ustrezna.
+Test4 se izkaže za zelo neprimeren test. Velikost tega testa je vedno 0, moč pa najmanjša izmed vseh testov.
+
+Permutacijski testi delujejo tako na odvisnih kot neodvisnih markerjih. Neodvisnost markerjev nekoliko poveča moč testa.
+
+Če imata markerja zelo podoben vpliv na odzivno spremenljivko (majhna razlika med $\beta_1$ in $\beta_2$), so velikosti testov še vedno prave, moči pa se zelo zmanjšajo.
+
+Testi dobro delujejo tudi na manjših vzorcih. Porazdelitve markerjev ne rabijo biti normalne. Delujejo tudi na diskretnih porazdelitvah markerjev (preverili smo na Poissonovi).
+
+# Viri
+
+VESNA, DOPIŠI VIRE, KI SI JIH UPORABILA.
+
+* Biček, M. (2009). *Grafični gradnik za merjenje kvalitete klasifikatorja s pomočjo krivulj* (Diplomsko delo). Univerza v Ljubljani, Fakulteta za računalništvo in informatiko, Ljubljana.
 
 
 
@@ -456,12 +465,3 @@ Narišemo lahko več ROC krivulj glede na prage (za vsak prag svojo).
 
 Točka $(0,0)$ je značilna za vsak ROC graf.
 Točk ne smemo obravnavati posamično, ker bi drugače bila oblika grafa odvisna od tega, katero točko prvo izberemo za obravnavo.
-
-Na strani 13 v (Biček, 2009) je primer algoritma za ROC (psevdokoda).
-
-Uporabni primeri v tej diplomi.
-
-# Viri
-
-* Biček, M. (2009). *Grafični gradnik za merjenje kvalitete klasifikatorja s pomočjo krivulj* (Diplomsko delo). Univerza v Ljubljani, Fakulteta za računalništvo in informatiko, Ljubljana.
-
