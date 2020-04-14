@@ -1,37 +1,43 @@
 ---
 title: "Primerjava ploščin pod ROC krivuljo"
 author: "Vesna Zupanc in Anja Žavbi Kunaver"
-date: "3 3 2020"
+date: "`r Sys.Date()`"
 output:
-  html_document: 
-    css: oblikovanje.css
-    fig_caption: yes
-    number_sections: yes
-    toc: yes
+  rmdformats::readthedown:
+    highlight: kate
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```{r setup, echo=FALSE, cache=FALSE, warning=FALSE, message=FALSE}
+source("lib.R")
+
+## Global options
+options(max.print="75")
+opts_chunk$set(echo=FALSE,
+	             cache=FALSE,
+               prompt=FALSE,
+               tidy=TRUE,
+               comment=NA,
+               message=FALSE,
+               warning=FALSE)
+opts_knit$set(width=75)
 ```
 
+
 ```{r}
-source("lib.R")
 source("fun.R")
 source("results/podatki_in_testi.R") #vsebuje: podatki1-podatki10, test1.1:test4.1
 source("results/properties.R") #vsebuje: lastnosti1-10
 ```
 
-# Povzetek
-
 # Uvod
 
-V seminarski nalogi želimo prikazali uporabo ROC krivulj in kako nam pomagajo pri odločanju med dvema klasifikatorjema. ...
+V seminarski nalogi želimo prikazati uporabo ROC krivulj in kako nam pomagajo pri odločanju med dvema klasifikatorjema. V ta namen bomo z uporabo permutacijskih testov na različnih podatkih primerjali AUC vrednosti markerjev. Preverili bomo lastnosti različnih permutacijskih testov za različno generirane podatke (10 scenarijev) in jih med seboj primerjali. 
 
 # Teoretične osnove
 
 ## ROC krivulje in AUC
 
-Za začetek si poglejmo, kaj so ROC krivulje in kaj je mera AUC. ROC krivulje (ang. curve - receiver operating characteristic curve) je grafični prikaz, ki prikazuje uspešnost klasifikacijskega modela pri vseh pragovih klasifikacije. Prikazuje dva parametra:
+Za začetek si poglejmo, kaj so ROC krivulje in kaj je mera AUC. ROC krivulja (ang. curve - receiver operating characteristic curve) je grafični prikaz, ki prikazuje uspešnost klasifikacijskega modela pri vseh pragovih klasifikacije. Prikazuje dva parametra:
 
 * Stopnja resnično pozitivnih (TPR - True positive rate)
 * Stopnja lažno pozitivnih (FPR - False positive rate)
@@ -49,9 +55,15 @@ $$TPR = \frac{TP}{TP+FN}$$
 Stopnja lažno pozitivnih (FPR) pa kot:
 
 $$FPR = \frac{FP}{FP+TN}$$
-ROC krivulja nariše TPR v primerjavi s FPR, pri različnih pragovih klasifikacije. Z nižanjem praga za razvrstitev je več postavk opredeljenih kot pozitivnih, kar povečuje tako lažno kot resnično pozitivne. 
+ROC krivulja nariše TPR v primerjavi s FPR pri različnih pragovih klasifikacije. Z nižanjem praga za razvrstitev je več postavk opredeljenih kot pozitivnih, kar povečuje tako lažno kot resnično pozitivne. 
 
-Neka slika ROC? 
+```{r fig.cap="Primer ROC krivulje"}
+podatki0 <- get.data(100, 0, 0, 0, 3, 1)
+pred1 <- prediction(podatki0$X1, podatki0$y) 
+perf1 <- performance(pred1,"tpr","fpr")
+plot(perf1,col="cadetblue", xlab="Stopnja lazno pozitivnih (FPR)", ylab="Stopnja resnicno pozitivnih (TPR)")
+```
+ 
 
 AUC (Area Under the ROC Curve) predstavlja ploščino pod ROC krivuljo in s tem predstavlja skupno merilo uspešnosti za vse možne pragove klasifikacije. ROC torej predstavlja verjetnostno krivuljo, AUC pa predstavlja stopnjo ali merilo ločljivosti. Pove nam, kako dobro model razlikuje med posameznimi razredi. Višji kot je AUC, boljši je model pri napovedovanju oziroma določanju razredov. 
 
@@ -103,7 +115,7 @@ kable(head(podatki1), booktabs=T, caption="Izsek iz tabele podatkov") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-Poglejmo si, kakšni sta dobljeni ROC krivulji in kakšni sta pripradajoči AUC vrednosti. 
+Poglejmo si, kakšni sta dobljeni ROC krivulji in kakšni sta pripadajoči AUC vrednosti. 
 
 ```{r fig.cap="ROC krivulji na generiranem vzorcu", fig.align="center"}
 plot.roc(podatki1)
@@ -115,10 +127,10 @@ razmerje_vzorec <- auc.list$razmerje
 ```
 <br>
 
-Iz ROC krivulje lahko vidimo, da je na naših podatkih Marker 1 boljši kot Marker 2. Vrednosti AUC, torej velikosti ploščine pod ROC krivuljama pa sta:
+Iz ROC krivulje lahko vidimo, da je na naših podatkih Marker 1 boljši kot Marker 2. Vrednosti AUC, torej velikosti ploščin pod ROC krivuljama pa sta:
 
-* $AUC_1$: `r round(auc1,3)`
-* $AUC_2$: `r round(auc2,3)`
+* \(AUC_1: `r round(auc1,3)` \)
+* \(AUC_2: `r round(auc2,3)` \)
 
 
 ## Postavitev hipoteze in testiranje
@@ -134,25 +146,25 @@ kable(testi, booktabs=T, caption="Definicije testov") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-Izkaže se, da v kolikor želimo, da naši testi delujejo tudi za različno porazdeljene markerje, moramo pred izračunom testne statistike in permutiranjem markerja pretvoriti tako, da jim priredimo ranke. S tem na nek način standardiziramo spremenljivki, brez da bi s tem vplivali na vrednost AUC statistike. 
+Izkaže se, da v kolikor želimo, da naši testi delujejo tudi za različno porazdeljene markerje, moramo pred izračunom testne statistike in permutiranjem markerja pretvoriti tako, da jim priredimo range. S tem na nek način standardiziramo spremenljivki, brez da bi s tem vplivali na vrednosti AUC statistike.
 
-V primeru, ko permutiramo stolpec z bolezmi, se moramo zavedati, da s tem uničimo vpliv markerjev na izid bolezni, torej bi v takšnem primeru markerja mogla biti enakovredna, vendar pa bi imela oba vrednost AUC enako $\frac{1}{2}$.
+V primeru, ko permutiramo stolpec z boleznimi, se moramo zavedati, da s tem uničimo vpliv markerjev na izid bolezni, torej bi v takšnem primeru markerja morala biti enakovredna, vendar pa bi imela oba vrednost AUC enako $\frac{1}{2}$.
 
-V nasprotju s permutacijo po stoplcu z boleznimi, v primeru permutiranja po markerjih želimo obdržati njuno medsebojno odvisnot in vpliv na izid bolezni. To naredimo tako, da v vsaki vrstici markerja slučajno zamenjamo ali ne.
+V nasprotju s permutacijo po stolpcu z boleznimi, v primeru permutiranja po markerjih želimo obdržati njuno medsebojno odvisnot in vpliv na izid bolezni. To naredimo tako, da v vsaki vrstici markerja slučajno zamenjamo ali ne.
 
 ### Ničelna domneva
 
 Naša ničelna domneva je, da sta markerja enakovredna, oziroma, da sta njuni vrednosti AUC enaki.
 Pri permutacijskih testih, kjer imamo za testno statistiko razliko AUC obeh markerjev (Test 1 in Test 2) je 
 
-$$H_0: AUC_1-AUC_2=0 \text{ (razlika je enaka 0)}.$$
+\[H_0: AUC_1-AUC_2=0 \text{ (razlika je enaka 0)}.\]
 
-Vrednost testne statistike na vzorcu je enaka $AUC_1-AUC_2=$ `r round(razlika_vzorec,3)`.
+Vrednost testne statistike na vzorcu je enaka \(AUC_1-AUC_2= `r round(razlika_vzorec,3)`\).
 
 Pri permutacijskih testih, kjer imamo za testno statistiko razmerje AUC obeh markerjev (Test 3 in Test 4), pa je
 
 $$H_0: \frac{AUC_1}{AUC_2}=1 \text{ (razmerje je enako 1)}.$$
-Vrednost testne statistike na vzorcu je enaka $\frac{AUC_1}{AUC_2}=$ `r round(razmerje_vzorec,3)`.
+Vrednost testne statistike na vzorcu je enaka \(\frac{AUC_1}{AUC_2}= `r round(razmerje_vzorec,3)`\).
 
 Vidimo, da so vsi testi dvostranski. Pri testiranju bomo povsod uporabljali stopnjo značilnosti $\alpha = 0.05$. 
 
@@ -190,7 +202,7 @@ Dobljena vrednost testne statistike znaša `r round(test3.1$t,3)`, izračunana p
 
 **Rezultati za Test 4 (permutiranje y in razmerje)**
 
-```{r fig.cap="Porazdelitev testne statistike pod H_0 in rezultat testa za Test 3", fig.align="center"}
+```{r fig.cap="Porazdelitev testne statistike pod H_0 in rezultat testa za Test 4", fig.align="center"}
 plot.test(test4.1, iz=T, p.val=T)
 ```
 <br>
@@ -199,13 +211,13 @@ Dobljena vrednost testne statistike znaša `r round(test4.1$t,3)`, izračunana p
 
 ## Lastnosti testov
 
-Preverili bomo lastnosi vseh štirih testov, in izbrali tistega, ki je najbolj primeren za naše podatke. 
+Preverili bomo lastnosi vseh štirih testov in izbrali tistega, ki je najbolj primeren za naše podatke. 
 
-Za preverjanje velikosti testa bomo podatke simulirali pod ničelno hipotezo, ki pravi, da je AUC enaka za oba parametra. Torej izenačimo $\beta_1$ in $\beta_2$ in izid generiramo kot $Y=3X_1+3X_2+\epsilon$. Za določitev velikosti testa večkrat simuliramo podatke in izvedemo test, potem pa pogledamo delež zavrnjenih ničelnih hipotez, za katerega želimo, da je manjši ali enak stopnji značilnosti $\alpha=0.05$. 
+Za preverjanje velikosti testa bomo podatke simulirali pod ničelno hipotezo, ki pravi, da je vrednost AUC enaka za oba parametra. Torej izenačimo $\beta_1$ in $\beta_2$ in izid generiramo kot $Y=3X_1+3X_2+\epsilon$. Za določitev velikosti testa večkrat simuliramo podatke in izvedemo test, potem pa pogledamo delež zavrnjenih ničelnih hipotez, za katerega želimo, da je manjši ali enak stopnji značilnosti $\alpha=0.05$. 
 
 Za preverjanje moči testa bomo podatke simulirali s pravimi vrednostmi, ki smo jih določili na začetku poglavja. Pogledali bomo, kakšno moč ima posamezen test, tako da bomo podatke simulirali večkrat in na koncu izračunali delež zavrnjenih ničelnih hipotez. Za ta delež si seveda želimo, da je čimvečji.
 
-Odločimo se za $1000$ simulacij za vsak test, za velikosti in za moč.
+Odločimo se za $10000$ simulacij za vsak test za velikosti in moč.
 
 ```{r}
 kable(lastnosti1 %>% round(2), booktabs=T, caption="Lastnosti testov") %>%
@@ -215,18 +227,17 @@ kable(lastnosti1 %>% round(2), booktabs=T, caption="Lastnosti testov") %>%
 
 # Lastnosti permutacijskih testov na različnih scenarijih
 
-Pogledali smo že, kako naši permutacijski testi delujejo na primeru, kjer sta markerja sicer korelirana, vendar sta enako in normalno porazdeljena. Želimo preveriti, kako se permutacijski testi obašanjo še v drugih, bolj ali manj ekstremnih primerih. V ta namen definiramo različne scenarije, glede na porazdelitve markerjev in glede na velikost vplivov markerjev na izid bolezni.
+Pogledali smo že, kako naši permutacijski testi delujejo na primeru, kjer sta markerja sicer korelirana, vendar sta enako in normalno porazdeljena. Želimo preveriti, kako se permutacijski testi obnašajo še v drugih, bolj ali manj ekstremnih primerih. V ta namen definiramo različne scenarije, glede na porazdelitve markerjev in glede na velikost vplivov markerjev na izid bolezni.
 
-Podatke generiramo na enak način kot v prejšnjem primeru, le da spreminjamo porazdelitve, velikosti vplivov in velikost začetnega vzorca. V vseh primerih smo za lastnosti testa uporabili $1000$ simulacij. 
+Podatke generiramo na enak način kot v prejšnjem primeru, le da spreminjamo porazdelitve, velikosti vplivov in velikost začetnega vzorca. V vseh primerih smo za lastnosti testa uporabili $10000$ simulacij. Glede na število izvedenih simulacij, lahko izračunamo 95% interval zaupanja za velikost testa, v kolikor je velikost enaka 0.05. Dobljen interval zaupanje je [0.046, 0.054] in če dobimo velikost testa izven tega intervala, posumimo, da velikost testa ni prava (0.05).
 
-Hitro lahko ugotovimo, da je časovna zahtevnost simulacij za več različnih scenarijev zelo velika. V pomoč v programu R nam je tako paket `parallel` in funkcija `parSapply`, s pomočjo katerih simulacije prenesemo na več jeder znotraj enega procesorja in s tem zmanjšamo časovno zahtevnost. Na tak način smo zmanjšali več urne ali celo več dnevne simulacije na simulacijo dolgo 20 minut. 
+Hitro lahko ugotovimo, da je časovna zahtevnost simulacij za več različnih scenarijev zelo velika. V veliko pomoč v programu R nam je tako lahko paket `parallel` in funkcija `parSapply`, s pomočjo katerih simulacije prenesemo na več jeder znotraj enega procesorja in s tem zmanjšamo časovno zahtevnost. Na tak način smo zmanjšali več dnevne simulacije na simulacijo dolgo približno 3 ure. Seveda pa je v tem primeru dolžina simulacije odvisna od zmogljivosti računalnika, predvsem od tega, koliko jedrni procesor se nahaja v računalniku.  
 
-## Rezultati simulacij
+## Rezultati simulacij {.tabset .tabset-fade .tabset-pills}
 
 ### Prvotni scenarij (enaka porazdelitev)
 
 ```{r}
-#source("results/rezultati_enaka_porazdelitev.R")
 auc.list <- get.AUC(podatki1)
 auc1 <- auc.list$AUC1
 auc2 <- auc.list$AUC2
@@ -234,29 +245,66 @@ razlika_vzorec <- auc.list$razlika
 razmerje_vzorec <- auc.list$razmerje
 ```
 
+<br>
 Prvotni primer smo si pogledali že v prejšnjem razdelku, kot referenco in za lažjo primerjavo med različnimi scenariji pa še enkrat poglejmo samo lastnosti testov. 
 
-Predpostavke scenarija so:
+<div class = "row">
 
-* $n = 100$
-* $X_1 \sim N(0,1)$
-* $X_2 \sim N(0,1)$
-* $\rho = 0.4$ 
-* $\beta_1 = 6$
-* $\beta_2 = 2$
 
-Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+<div class = "col-md-4">
+<br>
+
+
+<strong>Predpostavke</strong>:
+
+<font size="2">
+<li>$n = 100$</li>
+<li>$X_1 \sim N(0,1)$</li>
+<li>$X_2 \sim N(0,1)$</li>
+<li>$\rho = 0.4$</li>
+<li>$\beta_1 = 6$</li>
+<li>$\beta_2 = 2$</li>
+</font>
+
+<strong>Testni statistiki na enem vzorcu</strong>:
+
+<font size="2">
+<li>\(AUC_1-AUC_2 = `r round(razlika_vzorec,3)`  \)</li>
+<li>\(AUC_1/AUC_2 = `r round(razmerje_vzorec,3)`  \)</li>
+</font>
+
+</div>
+
+<div class = "col-md-8">
+
+```{r fig.cap="ROC krivulji za Scenarij 1", fig.align="center"}
+plot.roc(podatki1)
+```
+</div>
+</div>
+
+<div class = "row">
+
+<div class = "col-md-4">
 
 ```{r}
-kable(lastnosti1, booktabs=T, caption="Prvotni scenarij") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+kable(lastnosti1%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 1") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"))
 ```
+</div>
 
+<div class = "col-md-8">
+<br>
+<strong>Komentar:</strong>
+V primeru, ko imamo enako in normalno porazdeljena markerja, so vse moči testov zadovoljivo visoke. Prav tako so velikosti testov ustrezne, saj so manjše ali enake 0.05. V primeru ko mešamo po stolpcu z boleznimi, so velikosti testov zelo majhne in velikosti velike, kar je najverjetneje zaradi ugodnih predpostavk, saj kot smo že omenili, test uniči povezanost markerjev z nastopom bolezni. 
+</div>
 
+</div>
+
+***
 ### Različni pričakovani vrednosti markerjev
 
 ```{r}
-#source("results/rezultati_razlicna_porazdelitev.R")
 auc.list <- get.AUC(podatki2)
 auc1 <- auc.list$AUC1
 auc2 <- auc.list$AUC2
@@ -264,26 +312,59 @@ razlika_vzorec <- auc.list$razlika
 razmerje_vzorec <- auc.list$razmerje
 ```
 
-V drugem primeru sta markerja generirana iz normalne porazdelitve, vendar z različnima povprečjema. Vse ostale vrednosti so enake kot v prvotnem scenariju. Predpostavke so torej:
+<br>
+Zanima nas, kaj se zgodi, če glede na prvotni primer enakih normalnih porazdelitev, pri enem od markerjev porazdelitev malo zamaknemo. S tem namenom smo spremenili povprečno vrednost drugega markerja iz \(0\) na \(2\).
 
-* $n = 100$
-* $X_1 \sim N(0,1)$
-* $X_2 \sim N(2,1)$
-* $\rho = 0.4$ 
-* $\beta_1 = 6$
-* $\beta_2 = 2$
+<div class = "row">
+<div class = "col-md-4">
+<br>
+<strong>Predpostavke</strong>:
 
-Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+<font size="2">
+<li>$n = 100$</li>
+<li>$X_1 \sim N(0,1)$</li>
+<li>$X_2 \sim N(2,1)$</li>
+<li>$\rho = 0.4$</li>
+<li>$\beta_1 = 6$</li>
+<li>$\beta_2 = 2$</li>
+</font>
+
+<strong>Testni statistiki na enem vzorcu</strong>:
+
+<font size="2">
+<li>\(AUC_1-AUC_2 = `r round(razlika_vzorec,3)`  \)</li>
+<li>\(AUC_1/AUC_2 = `r round(razmerje_vzorec,3)`  \)</li>
+</font>
+
+</div>
+
+<div class = "col-md-8">
+
+```{r fig.cap="ROC krivulji za Scenarij 2", fig.align="center"}
+plot.roc(podatki2)
+```
+</div>
+</div>
+<div class = "row">
+<div class = "col-md-4">
 
 ```{r}
-kable(lastnosti2%>%round(2), booktabs=T, caption="Različni pričakovani vrednosti") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+kable(lastnosti2%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 2") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"))
 ```
 
+</div>
+<div class = "col-md-8">
+<br>
+<strong>Komentar:</strong>
+Zamaknjena porazdelitev, oziroma različni pričakovani vrednosti markerjev ne spremenita lastnosti testov, kjub temu, da je zaradi kombinacije predpostavk v tem primeru AUC vrednost drugega markerja lahko bolj primerljiva z AUC vrednostjo prvega markerja. Izkazalo se je, da v kolikor v testih ne bi uporabili rangiranja in s tem na nek način standardiziranja spremenljivk, bi bile tako velikosti, kot moči testa v primeru zamaknjene porazdelitve veliko slabše.
+</div>
+</div>
+
+***
 ### Neodvisna markerja
 
 ```{r}
-source("results/rezultati_kor0.R")
 auc.list <- get.AUC(podatki3)
 auc1 <- auc.list$AUC1
 auc2 <- auc.list$AUC2
@@ -291,27 +372,59 @@ razlika_vzorec <- auc.list$razlika
 razmerje_vzorec <- auc.list$razmerje
 ```
 
-Preverimo, kakšne rezultate dobimo, če sta markerja med seboj neodvisna, še vedno pa enako normalno porazdeljena.
-Predpostavke:
+<br>
+Če želimo preveriti kako vpliva odvisnost markerjev, moramo preveriti, kakšne rezultate dobimo pri različnih korelacijskih faktorjih med markerjema. V tem primeru bomo pogledali rezultate za nekorelirana markerja. 
 
-* $n = 100$
-* $X_1 \sim N(0,1)$
-* $X_2 \sim N(0,1)$
-* $\rho = 0$ 
-* $\beta_1 = 6$
-* $\beta_2 = 2$
+<div class = "row">
+<div class = "col-md-4">
+<br>
+<strong>Predpostavke</strong>:
 
-Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+<font size="2">
+<li>$n = 100$</li>
+<li>$X_1 \sim N(0,1)$</li>
+<li>$X_2 \sim N(0,1)$</li>
+<li>$\rho = 0$</li>
+<li>$\beta_1 = 6$</li>
+<li>$\beta_2 = 2$</li>
+</font>
+
+<strong>Testni statistiki na enem vzorcu</strong>:
+
+<font size="2">
+<li>\(AUC_1-AUC_2 = `r round(razlika_vzorec,3)`  \)</li>
+<li>\(AUC_1/AUC_2 = `r round(razmerje_vzorec,3)`  \)</li>
+</font>
+
+</div>
+
+<div class = "col-md-8">
+
+```{r fig.cap="ROC krivulji za Scenarij 3", fig.align="center"}
+plot.roc(podatki3)
+```
+</div>
+</div>
+<div class = "row">
+<div class = "col-md-4">
 
 ```{r}
-kable(lastnosti3 %>% round(2), booktabs=T, caption="Neodvisna markerja") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+kable(lastnosti3%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 3") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"))
 ```
 
+</div>
+<div class = "col-md-8">
+<br>
+<strong>Komentar:</strong>
+Glede na razliko v ROC krivuljah sklepamo, da je lažje ločiti kateri marker bolje napoveduje, oziroma ima večji vpliv na izid bolezni. Vrednost AUC drugega markerja je v primeru nekoreliranosti s prvim nižja in zato tudi hitreje zavrnemo test. Z našimi simulacijami smo test zavrnili skoraj vedno (vrednosti so zaokrožene). 
+</div>
+</div>
+
+***
 ### Velika koreliranost
 
 ```{r}
-source("results/rezultati_kor0.9.R")
 auc.list <- get.AUC(podatki4)
 auc1 <- auc.list$AUC1
 auc2 <- auc.list$AUC2
@@ -319,26 +432,59 @@ razlika_vzorec <- auc.list$razlika
 razmerje_vzorec <- auc.list$razmerje
 ```
 
-Poglejmo še nasprotni primer od prejšnjega - zdaj sta markerja močno korelirana. Predpostavke scenarija so tako:
+<br>
+Če želimo preveriti kako vpliva odvisnost markerjev, moramo preveriti, kakšne rezultate dobimo pri različnih korelacijskih faktorjih med markerjema. V tem primeru bomo pogledali rezultate za močno koreliranima markerja. 
 
-* $n = 100$
-* $X_1 \sim N(0,1)$
-* $X_2 \sim N(0,1)$
-* $\rho = 0.9$ 
-* $\beta_1 = 6$
-* $\beta_2 = 2$
+<div class = "row">
+<div class = "col-md-4">
+<br>
+<strong>Predpostavke</strong>:
 
-Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+<font size="2">
+<li>$n = 100$</li>
+<li>$X_1 \sim N(0,1)$</li>
+<li>$X_2 \sim N(0,1)$</li>
+<li>$\rho = 0.9$</li>
+<li>$\beta_1 = 6$</li>
+<li>$\beta_2 = 2$</li>
+</font>
+
+<strong>Testni statistiki na enem vzorcu</strong>:
+
+<font size="2">
+<li>\(AUC_1-AUC_2 = `r round(razlika_vzorec,3)`  \)</li>
+<li>\(AUC_1/AUC_2 = `r round(razmerje_vzorec,3)`  \)</li>
+</font>
+
+</div>
+
+<div class = "col-md-8">
+
+```{r fig.cap="ROC krivulji za Scenarij 4", fig.align="center"}
+plot.roc(podatki4)
+```
+</div>
+</div>
+<div class = "row">
+<div class = "col-md-4">
 
 ```{r}
-kable(lastnosti4 %>% round(2), booktabs=T, caption="Velikosti in moči testov") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+kable(lastnosti4%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 4") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"))
 ```
 
+</div>
+<div class = "col-md-8">
+<br>
+<strong>Komentar:</strong>
+V nasprotju z nekoreliranimi podatki, pa pri močno koreliranih praktično ne moremo več ločiti, kateri marker je tisti, ki zares vpliva na izid bolezni. V takem primeru smo dobili vrednosti AUC zelo visoke za oba markerja in moč testa je posledično veliko nižja. Velikost testa je malo manjša kot v ostalih primerih z normalno porazdeljenimi markerji.
+</div>
+</div>
+
+***
 ### Podoben vpliv
 
 ```{r}
-source("results/rezultati_bete.R")
 auc.list <- get.AUC(podatki5)
 auc1 <- auc.list$AUC1
 auc2 <- auc.list$AUC2
@@ -346,26 +492,59 @@ razlika_vzorec <- auc.list$razlika
 razmerje_vzorec <- auc.list$razmerje
 ```
 
-Preverimo, kaj se zgodi, ko sta si $\beta_1$ in $\beta_2$ bolj podobni in imata s tem markerja podoben vendar še vedno enak vpliv. Predpostavke scenarija so tako:
+<br>
+Preverimo, kaj se zgodi, ko sta si $\beta_1$ in $\beta_2$ bolj podobni in imata s tem markerja podoben, vendar še vedno različen vpliv.
 
-* $n = 100$
-* $X_1 \sim N(0,1)$
-* $X_2 \sim N(0,1)$
-* $\rho = 0.4$ 
-* $\beta_1 = 6$
-* $\beta_2 = 5$
+<div class = "row">
+<div class = "col-md-4">
+<br>
+<strong>Predpostavke</strong>:
 
-Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+<font size="2">
+<li>$n = 100$</li>
+<li>$X_1 \sim N(0,1)$</li>
+<li>$X_2 \sim N(0,1)$</li>
+<li>$\rho = 0.4$</li>
+<li>$\beta_1 = 6$</li>
+<li>$\beta_2 = 5$</li>
+</font>
+
+<strong>Testni statistiki na enem vzorcu</strong>:
+
+<font size="2">
+<li>\(AUC_1-AUC_2 = `r round(razlika_vzorec,3)`  \)</li>
+<li>\(AUC_1/AUC_2 = `r round(razmerje_vzorec,3)`  \)</li>
+</font>
+
+</div>
+
+<div class = "col-md-8">
+
+```{r fig.cap="ROC krivulji za Scenarij 5", fig.align="center"}
+plot.roc(podatki5)
+```
+</div>
+</div>
+<div class = "row">
+<div class = "col-md-4">
 
 ```{r}
-kable(lastnosti5 %>% round(2), booktabs=T, caption="Podoben vpliv markerjev") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+kable(lastnosti5%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 5") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"))
 ```
 
+</div>
+<div class = "col-md-8">
+<br>
+<strong>Komentar:</strong>
+Ko imata markerja podoben, oziroma skoraj enak vpliv na izid bolezni, sta tudi AUC vrednosti zelo podobni. Posledično je seveda moč testa manjša, opazimo pa tudi, da se je v primeru Testa 1 (mešanje po markerjih in razlika) znižala velikost za 1.o.t. Moč testa bi lahko mogoče povečali, v kolikor bi imeli večji vzorec, vseeno pa bi le ta ostala zelo nizka. 
+</div>
+</div>
+
+***
 ### Podobni beti, neodvisna markerja
 
 ```{r}
-source("results/rezultati_bete_neodvisna.R")
 auc.list <- get.AUC(podatki6)
 auc1 <- auc.list$AUC1
 auc2 <- auc.list$AUC2
@@ -373,26 +552,59 @@ razlika_vzorec <- auc.list$razlika
 razmerje_vzorec <- auc.list$razmerje
 ```
 
-Glede na to, da smo pri podobnih vrednostih $\beta_1$ in $\beta_2$ dobili majhne moči testov, pri neodvisnih markerjih pa zelo velike moči testov, poglejmo, kaj se zgodi, če uporabimo obe lastnosti podatkov hkrati:
+<br>
+Glede na to, da smo pri podobnih vrednostih $\beta_1$ in $\beta_2$ dobili majhne moči testov, pri neodvisnih markerjih pa zelo velike moči testov, poglejmo, kaj se zgodi, če uporabimo obe lastnosti podatkov hkrati.
 
-* $n = 100$
-* $X_1 \sim N(0,1)$
-* $X_2 \sim N(0,1)$
-* $\rho = 0$ 
-* $\beta_1 = 6$
-* $\beta_2 = 5$
+<div class = "row">
+<div class = "col-md-4">
+<br>
+<strong>Predpostavke</strong>:
 
-Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+<font size="2">
+<li>$n = 100$</li>
+<li>$X_1 \sim N(0,1)$</li>
+<li>$X_2 \sim N(0,1)$</li>
+<li>$\rho = 0$</li>
+<li>$\beta_1 = 6$</li>
+<li>$\beta_2 = 5$</li>
+</font>
+
+<strong>Testni statistiki na enem vzorcu</strong>:
+
+<font size="2">
+<li>\(AUC_1-AUC_2 = `r round(razlika_vzorec,3)`  \)</li>
+<li>\(AUC_1/AUC_2 = `r round(razmerje_vzorec,3)`  \)</li>
+</font>
+
+</div>
+
+<div class = "col-md-8">
+
+```{r fig.cap="ROC krivulji za Scenarij 6", fig.align="center"}
+plot.roc(podatki6)
+```
+</div>
+</div>
+<div class = "row">
+<div class = "col-md-4">
 
 ```{r}
-kable(lastnosti6 %>% round(2), booktabs=T, caption="Podoben vpliv, neodvisna markerja") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+kable(lastnosti6%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 6") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"))
 ```
 
+</div>
+<div class = "col-md-8">
+<br>
+<strong>Komentar:</strong>
+Vrednosti AUC sta si v našem primeru nekoliko bolj različni, vendar zelo podobni. Moč testa je zato zelo majhna, kar smo lahko tudi pričakovali. 
+</div>
+</div>
+
+***
 ### Majhen vzorec
 
 ```{r}
-source("results/rezultati_small.R")
 auc.list <- get.AUC(podatki7)
 auc1 <- auc.list$AUC1
 auc2 <- auc.list$AUC2
@@ -400,26 +612,58 @@ razlika_vzorec <- auc.list$razlika
 razmerje_vzorec <- auc.list$razmerje
 ```
 
-V naslednjem primeru generiramo manjši začetni vzorec. Vse ostale predpostavke so enake kot v prvotnem primeru:
+<br>
+Želimo preveriti, kako se obnesejo permutacijski testi v primeru zelo majhnega vzorca podatkov, zato v tem primeru generiramo manjši začetni vzorec, ostale predpostavke pa pustimo takšne, kot so bile v prvotnem primeru.
 
-* $n = 20$
-* $X_1 \sim N(0,1)$
-* $X_2 \sim N(0,1)$
-* $\rho = 0.4$ 
-* $\beta_1 = 6$
-* $\beta_2 = 2$
+<div class = "row">
+<div class = "col-md-4">
+<br>
+<strong>Predpostavke</strong>:
 
-Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+<font size="2">
+<li>$n = 20$</li>
+<li>$X_1 \sim N(0,1)$</li>
+<li>$X_2 \sim N(0,1)$</li>
+<li>$\rho = 0.4$</li>
+<li>$\beta_1 = 6$</li>
+<li>$\beta_2 = 2$</li>
+</font>
+
+<strong>Testni statistiki na enem vzorcu</strong>:
+
+<font size="2">
+<li>\(AUC_1-AUC_2 = `r round(razlika_vzorec,3)`  \)</li>
+<li>\(AUC_1/AUC_2 = `r round(razmerje_vzorec,3)`  \)</li>
+</font>
+
+</div>
+
+<div class = "col-md-8">
+
+```{r fig.cap="ROC krivulji za Scenarij 7", fig.align="center"}
+plot.roc(podatki7)
+```
+</div>
+</div>
+<div class = "row">
+<div class = "col-md-4">
 
 ```{r}
-kable(lastnosti7 %>% round(2), booktabs=T, caption="Majhen vzorec") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+kable(lastnosti7%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 7") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"))
 ```
 
+</div>
+<div class = "col-md-8">
+<br>
+<strong>Komentar:</strong>
+Kadar imamo tako majhen vzorec, testi niso več zanesljivi. Težaven je že izračun ROC krivulje in posledično vrednosti AUC.
+</div>
+</div>
+***
 ### Gamma porazdelitev
 
 ```{r}
-source("results/rezultati_gamma.R")
 auc.list <- get.AUC(podatki8)
 auc1 <- auc.list$AUC1
 auc2 <- auc.list$AUC2
@@ -427,26 +671,58 @@ razlika_vzorec <- auc.list$razlika
 razmerje_vzorec <- auc.list$razmerje
 ```
 
-Poglejmo še primer, ko markerja nista generirana iz normalne porazdelitve. Za začetek naj bosta oba oba generirana iz $\Gamma(2,2)$ ter medsebojno korelirana z $\rho=0.5$. Predpostavke so tako:
+<br>
+Poglejmo še primer, ko markerja nista generirana iz normalne porazdelitve. V tem primeru naj bosta oba oba generirana iz $\Gamma(2,2)$ ter medsebojno korelirana z $\rho=0.5$.
 
-* $n = 100$
-* $X_1 \sim \Gamma(2,2)$
-* $X_2 \sim \Gamma(2,2)$
-* $\rho = 0.5$ 
-* $\beta_1 = 6$
-* $\beta_2 = 2$
+<div class = "row">
+<div class = "col-md-4">
+<br>
+<strong>Predpostavke</strong>:
 
-Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+<font size="2">
+<li>$n = 100$</li>
+<li>$X_1 \sim \Gamma(2,2)$</li>
+<li>$X_2 \sim \Gamma(2,2)$</li>
+<li>$\rho = 0.5$</li>
+<li>$\beta_1 = 6$</li>
+<li>$\beta_2 = 2$</li>
+</font>
+
+<strong>Testni statistiki na enem vzorcu</strong>:
+
+<font size="2">
+<li>\(AUC_1-AUC_2 = `r round(razlika_vzorec,3)`  \)</li>
+<li>\(AUC_1/AUC_2 = `r round(razmerje_vzorec,3)`  \)</li>
+</font>
+
+</div>
+
+<div class = "col-md-8">
+
+```{r fig.cap="ROC krivulji za Scenarij 8", fig.align="center"}
+plot.roc(podatki8)
+```
+</div>
+</div>
+<div class = "row">
+<div class = "col-md-4">
 
 ```{r}
-kable(lastnosti8 %>% round(2), booktabs=T, caption="Velikosti in moči testov") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+kable(lastnosti8%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 8") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"))
 ```
 
+</div>
+<div class = "col-md-8">
+<br>
+<strong>Komentar:</strong>
+V primeru drugačne porazdelitve, kot normalne, so testi še vedno zelo zanesljivi. Nekoliko manjšo moč imata Test 2 in Test 4, torej testa, kjer permutiramo po stolpcu z boleznimi. Kot smo že omenili, tak test ni pravilen, saj ne uniči le razlike med markerjema, vednar celoten vpliv markerjev. 
+</div>
+</div>
+***
 ### Poissonova porazdelitev
 
 ```{r}
-source("results/rezultati_skoraj_enaka_porazdelitev.R")
 auc.list <- get.AUC(podatki9)
 auc1 <- auc.list$AUC1
 auc2 <- auc.list$AUC2
@@ -454,26 +730,58 @@ razlika_vzorec <- auc.list$razlika
 razmerje_vzorec <- auc.list$razmerje
 ```
 
-Za zaključek generiramo markerja iz diskretne porazdelitve. Naj bo $X_1 \sim Pois(2)$, $X_2 \sim Pois(2)$ in $\rho=0.5$. Predpostavke scenarija so torej:
+<br>
+Poglejmo si še primer, ko markerja generiramo markerja iz diskretne porazdelitve. Naj bo $X_1 \sim Pois(2)$, $X_2 \sim Pois(2)$ in $\rho=0.5$.
 
-* $n = 100$
-* $X_1 \sim Pois(2)$
-* $X_2 \sim Pois(2)$
-* $\rho = 0.5$ 
-* $\beta_1 = 6$
-* $\beta_2 = 2$
+<div class = "row">
+<div class = "col-md-4">
+<br>
+<strong>Predpostavke</strong>:
 
-Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+<font size="2">
+<li>$n = 100$</li>
+<li>$X_1 \sim Pois(2)$</li>
+<li>$X_2 \sim Pois(2)$</li>
+<li>$\rho = 0.5$</li>
+<li>$\beta_1 = 6$</li>
+<li>$\beta_2 = 2$</li>
+</font>
+
+<strong>Testni statistiki na enem vzorcu</strong>:
+
+<font size="2">
+<li>\(AUC_1-AUC_2 = `r round(razlika_vzorec,3)`  \)</li>
+<li>\(AUC_1/AUC_2 = `r round(razmerje_vzorec,3)`  \)</li>
+</font>
+
+</div>
+
+<div class = "col-md-8">
+
+```{r fig.cap="ROC krivulji za Scenarij 9", fig.align="center"}
+plot.roc(podatki9)
+```
+</div>
+</div>
+<div class = "row">
+<div class = "col-md-4">
 
 ```{r}
-kable(lastnosti9 %>% round(2), booktabs=T, caption="Velikosti in moči testov") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+kable(lastnosti9%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 9") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"))
 ```
 
+</div>
+<div class = "col-md-8">
+<br>
+<strong>Komentar:</strong>
+Tudi v primeru diskretne porazdelitve se Test 1 in Test 2 izkažeta za zanesljivega. Moč testa je visoka, primerni pa sta tudi velikosti testov.
+</div>
+</div>
+***
 ### Različni porazdelitvi
 
 ```{r}
-source("results/rezultati_skoraj_enaka_porazdelitev.R")
 auc.list <- get.AUC(podatki10)
 auc1 <- auc.list$AUC1
 auc2 <- auc.list$AUC2
@@ -481,27 +789,62 @@ razlika_vzorec <- auc.list$razlika
 razmerje_vzorec <- auc.list$razmerje
 ```
 
-Za zaključek generiramo markerja iz različnih porazdelitev. Naj bo $X_1 \sim N(0,1)$, $X_2 \sim Exp(1)$ in markerja neodvisna. Predpostavke scenarija so torej:
+<br>
+Pogledali smo že veliko različnih scenarijev, sedaj pa poglejmo še, kaj se zgodi, če sta markerja iz različnih porazdelitev. Naj bo $X_1 \sim N(0,1)$, $X_2 \sim Exp(1)$ in markerja neodvisna.
 
-* $n = 100$
-* $X_1 \sim N(0,1)$
-* $X_2 \sim Exp(1)$
-* $\rho = 0$ 
-* $\beta_1 = 6$
-* $\beta_2 = 2$
+<div class = "row">
+<div class = "col-md-4">
+<br>
+<strong>Predpostavke</strong>:
 
-Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
+<font size="2">
+<li>$n = 100$</li>
+<li>$X_1 \sim N(0,1)$</li>
+<li>$X_2 \sim Exp(1)$</li>
+<li>$\rho = 0$</li>
+<li>$\beta_1 = 6$</li>
+<li>$\beta_2 = 2$</li>
+</font>
+
+<strong>Testni statistiki na enem vzorcu</strong>:
+
+<font size="2">
+<li>\(AUC_1-AUC_2 = `r round(razlika_vzorec,3)`  \)</li>
+<li>\(AUC_1/AUC_2 = `r round(razmerje_vzorec,3)`  \)</li>
+</font>
+
+</div>
+
+<div class = "col-md-8">
+
+```{r fig.cap="ROC krivulji za Scenarij 10", fig.align="center"}
+plot.roc(podatki10)
+```
+</div>
+</div>
+<div class = "row">
+<div class = "col-md-4">
 
 ```{r}
-kable(lastnosti10 %>% round(2), booktabs=T, caption="Velikosti in moči testov") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
+kable(lastnosti10%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 10") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive"))
 ```
+
+</div>
+<div class = "col-md-8">
+<br>
+<strong>Komentar:</strong>
+V našem primeru različnih porazdelitev sta ROC krivulji močno različni ena od druge. vrednot AUC prvega markerja je tako zelo visoka, vrednost AUC drugega markerja pa zelo nizka. Zato smo dobili tudi tako visoke moči testov. Dobili pa smo tudi zelo majhne velikosti, kar pomeni, da v primeru enakih vplivov test zelo redko zavrne ničelno hipotezo. 
+</div>
+</div>
+
+***
 
 ## Primerjava lastnosti testov glede na scenarij
 
 Ker smo tekom simulacij in pregledovanja lastnosti testov že razbrali, da v primeru permutiranja po stolpcu z boleznimi test ne deluje dobro, bomo v tem razdelku podrobneje pogledali le teste, kjer permutiramo markerje. 
 
-Testa se torej razlikujeta le to tem, ali za testno statistiko vzamemo razliko ali razmerje AUC vrednosti markerjev. Za začetek si poglejmo velikosti za različna testa in scenarije.
+Testa se torej razlikujeta le po tem, ali za testno statistiko vzamemo razliko ali razmerje AUC vrednosti markerjev. V spodnji tabeli so prikazane velikosti in moči za različna testa in scenarije.
 
 ```{r}
 velikosti <- data.frame(lastnosti1$Velikost[c(1,3)],lastnosti2$Velikost[c(1,3)],lastnosti3$Velikost[c(1,3)],
@@ -525,35 +868,52 @@ colnames(moci) <- c("Razlika", "Razmerje")
 tabela.out <- cbind(velikosti,moci)
 
 kable(tabela.out%>%round(2), align = "c", booktabs = T,
-      caption = "Velikosti in moči za Test 1 in Test 2") %>%
+      caption = "Velikosti in moči za Test 1 in Test 3") %>%
 kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F) %>%
 add_header_above(c(" ", "Velikost" = 2, "Moč" = 2))
 ```
 
+Velikosti testov so primerne v vseh narejenih scenarijih, opazimo pa, da so v primeru testne statistike razmerij nekoliko manjše. Moči testov so primerljive in se razlikujejo za največ 1 o.t., kjer ima manjšo moč test z razmerji. Ne glede na manjše razlike, bi lahko rekli, da sta oba testa primerna za uporabo v skoraj vseh primerih. Zelo majhno moč imata testa v primeru močno koreliranih podatkov, zelo podobnih vplivov markerjev in pa v primeru zelo majhnega vzorca. V prvih dveh scenarijih imamo problem z ločitvijo med markerjema, v zadnjem pa že z generiranjem ROC krivulje. 
+
+# Pot do uspeha
+
+Pri definiranju podatkov in permutacijskih testov smo pred končnimi verzijami naleteli na kar nekaj težav, ki pa so vredne omembe. 
+
+Najprej smo poskusili s permutiranjem celotnih stolpcev markerjev, torej da v vsakem stolpcu naključno premešamo vse vrednosti. Pri tem smo vedno dobili velikosti prvega in tretjega testa (ko premutiramo po markerjih) enake nič. Ugotovili smo, da tako mešanje ni primerno, ker s tem uničimo odvisnost med markerjema in izidom.
+
+Da bi se izognili izničevanju vpliva markerjev smo tako poskusili z mešanjem vrednosti znotraj skupin bolnih in zdravih, vendar v tem primeru prav tako delno uničimo odvisnost med markerji in izidom. Posledično smo se nato odločili, da je najboljši način za ohranjanje vplivov permutiranje znotraj posameznikov, torej da za vsakega posameznika naključno zamenjamo vrednosti prvega in drugega markerja. Tako permutiranje se je izkazalo za uspešno, saj na ta način dobimo prave velikosti testov za prvi in tretji test. Pri permutiranju izida pa nimamo druge možnosti, kot da naključno premešamo celotni stolpec tabele in s tem izničimo odvisnost markerjev in izida.
+
+Najprej smo izvedli permutacijske teste brez uporabe rangov. Ker se je izkazalo, da taki testi niso primerni za markerja, ki nimata povsem enake porazdelitve, smo razmišljali, kako bi porazdelitvi standardizirali in odločili smo se poiskusiti z rangi, s tem pa smo pridobili končne teste, ki so uporabljeni v seminarski nalogi. 
+
+Na poti do iskanja pravih testov, ki bodo učitnkoviti in stabilni, pa nam je bila v pomoč tudi funkcija `praise()` iz istoimenskega paketa v programu R. Primer izpisa funkcije je prikazan spodaj.   
+
+```{r echo=TRUE}
+praise()
+```
+
+
 
 # Zaključek
 
-Najprej sva poskusili s permutiranjem celotnih stolpcev markerjev, torej da v vsakem stolpcu naključno premešamo vse vrednosti. Pri tem sva vedno dobili velikosti prvega in tretjega testa (ko premutiramo po markerjih) enake nič. Ugotovili sva, da tako mešanje ni primerno, ker s tem uničimo odvisnost med markerjema in izidom. Poskusili sva tudi z mešanjem vrednosti znotraj skupin bolnih in zdravih, vendar v tem primeru prav tako delno uničimo odvisnost med markerji in izidom. Kot najboljše permutiranje sva izbrali permutiranje znotraj posamezne osebe - torej da za vsakega posameznika naključno zamenjamo vrednosti prvega in drugega markerja. Tako permutiranje se je izkazalo za uspešno, saj na ta način dobimo prave velikosti testov za prvi in tretji test. Ko permutiramo izid pa nimamo druge možnosti, kot da naključno premešamo celotni stolpec tabele. S tem izničimo odvisnost markerjev in izida, posledično test2 in test4 nista primerna za uporabo.
+Na našem praktičnem primeru smo preiskusili definirane teste na podaktih, ki so bili generirani tako, da je en marker boljši od drugega, sta pa korelirana. V tem prvotnem primeru sta bila markerja enako, normalno porazdeljena. Pri prvih treh testih, smo ničeno hipotezo, da sta markerja enakovredna, pri stopnji značilnosti 0.05 zavrnili in sklepali, da imata markerja statistično značilno razliko AUC vrednosti. Ničelne hipoteze pa pri stopnji značilnosti 0.05 ali manj nismo uspeli zavrniti pri četrtem testu. 
 
-Test1 ima vedno največjo moč, z izjemo primera različnih porazdelitev markerjev (različnih pričakovanih vrednosti). Ta test bi ocenili kot najboljši. Je zelo konstanten, zmoti ga edino različna porazdelitev markerjev.
+Pri pregledovanju lastnosti smo si pogledali 10 različnih scenarijev. Zanimalo nas je kako stabilen je test, če spreminjamo porazdelitve, korelacijo markerjev in pa velikost vzorca. 
 
-Ugotovili smo, da markerja morata biti generirana iz enakih porazdelitev, sicer velikosti testov 1 in 3 niso prave.
-Bolj kot sta si markerja različna, manjši sta velikosti testov, kjer permutiramo po markerjih. STANDARDIZACIJA/RANGI????
+Ugotovili smo, da sta testa, kjer permutiramo markerje znotraj posameznikov primerna skoraj v vsakem primeru. Velikost testa je bila vedno enaka ali manjša stopnji značilnosti. 
 
-Ko mešamo po $Y$, s tem uničimo odvisnost med $X$ in $Y$. Zato testa 2 in 4 nista ustrezna.
-Test4 se izkaže za zelo neprimeren test. Velikost tega testa je vedno 0, moč pa najmanjša izmed vseh testov.
+Moči testa so bile manjše v primeru majhnega vzorca, v tem primeru pa smo opazili tudi, da imamo težave že z generiranjem ROC krivulj in izračunom AUC. 
 
-Permutacijski testi delujejo tako na odvisnih kot neodvisnih markerjih. Neodvisnost markerjev nekoliko poveča moč testa.
+Testi so imeli zelo majhno moč tudi v primeru skoraj enakega vpliva markerjev, kar je pričakovano, saj to pomeni da noben od markerjev ni izrazito boljši od drugega in rezultati bi bili podobni, ne glede na to katerega bi izbrali. Pri podobnem vplivu se je moč rahlo, vendar še vedno zelo malo dvignila v primeru, ko sta bila markerja neodvisna. 
 
-Če imata markerja zelo podoben vpliv na odzivno spremenljivko (majhna razlika med $\beta_1$ in $\beta_2$), so velikosti testov še vedno prave, moči pa se zelo zmanjšajo.
+Nekoliko manjša moč testov je bila tudi, ko smo imeli močno korelirana markerja. Videli smo, da smo v tem primeru dobili zelo visoki AUC vrednosti obeh markerjev, ki pa sta si bili zelo podobni. 
 
-Testi dobro delujejo tudi na manjših vzorcih. Porazdelitve markerjev ne rabijo biti normalne. Delujejo tudi na diskretnih porazdelitvah markerjev (preverili smo na Poissonovi).
+Testi pa torej dobro delujejo na zmerno koreliranih podatkih, ne-normalno ali celo diskretno porazdeljenih markerjih in pa tudi v primeru različnih porazdelitev markerjev. Ne smemo pa seveda pozabiti na uporabo rangov, saj so le-te ključni za dobre rezultate v primeru različnih porazdelitev.  
 
 # Viri
 
-VESNA, DOPIŠI VIRE, KI SI JIH UPORABILA.
+* https://nceas.github.io/oss-lessons/parallel-computing-in-r/parallel-computing-in-r.html
+* https://en.wikipedia.org/wiki/Receiver_operating_characteristic
+* https://towardsdatascience.com/understanding-auc-roc-curve-68b2303cc9c5
+* https://developers.google.com/machine-learning/crash-course/classification/roc-and-auc
 
 * Biček, M. (2009). *Grafični gradnik za merjenje kvalitete klasifikatorja s pomočjo krivulj* (Diplomsko delo). Univerza v Ljubljani, Fakulteta za računalništvo in informatiko, Ljubljana.
-
-
-
