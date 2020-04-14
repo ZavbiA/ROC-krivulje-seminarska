@@ -9,7 +9,7 @@
 
 source("fun.R")
 
-m <- 1000 #število simulacij za vsak test
+m <- 10000 #število simulacij za vsak test
 
 ##################################################################
 ##         Osnovni podatki (enaka porazdelitev)                 ##
