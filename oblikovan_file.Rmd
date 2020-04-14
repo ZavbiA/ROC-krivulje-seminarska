@@ -7,7 +7,6 @@ output:
     highlight: kate
 ---
 
-
 ```{r setup, echo=FALSE, cache=FALSE}
 library(knitr)
 #install.packages("rmdformats")
@@ -23,9 +22,7 @@ opts_chunk$set(echo=FALSE,
                message=FALSE,
                warning=FALSE)
 opts_knit$set(width=75)
-
 ```
-
 
 
 ```{r}
@@ -39,7 +36,7 @@ source("results/properties.R") #vsebuje: lastnosti1-10
 
 # Uvod
 
-V seminarski nalogi želimo prikazali uporabo ROC krivulj in kako nam pomagajo pri odločanju med dvema klasifikatorjema. ...
+V seminarski nalogi želimo prikazati uporabo ROC krivulj in kako nam pomagajo pri odločanju med dvema klasifikatorjema. V ta namen bomo z uporabo permutacijskih testov na različnih podatkih primerjali AUC vrednosti markerjev. Preverili bomo lastnosti različnih permutacijskih testov.
 
 # Teoretične osnove
 
@@ -63,7 +60,7 @@ $$TPR = \frac{TP}{TP+FN}$$
 Stopnja lažno pozitivnih (FPR) pa kot:
 
 $$FPR = \frac{FP}{FP+TN}$$
-ROC krivulja nariše TPR v primerjavi s FPR, pri različnih pragovih klasifikacije. Z nižanjem praga za razvrstitev je več postavk opredeljenih kot pozitivnih, kar povečuje tako lažno kot resnično pozitivne. 
+ROC krivulja nariše TPR v primerjavi s FPR pri različnih pragovih klasifikacije. Z nižanjem praga za razvrstitev je več postavk opredeljenih kot pozitivnih, kar povečuje tako lažno kot resnično pozitivne. 
 
 Neka slika ROC? 
 
@@ -117,7 +114,7 @@ kable(head(podatki1), booktabs=T, caption="Izsek iz tabele podatkov") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-Poglejmo si, kakšni sta dobljeni ROC krivulji in kakšni sta pripradajoči AUC vrednosti. 
+Poglejmo si, kakšni sta dobljeni ROC krivulji in kakšni sta pripadajoči AUC vrednosti. 
 
 ```{r fig.cap="ROC krivulji na generiranem vzorcu", fig.align="center"}
 plot.roc(podatki1)
@@ -129,7 +126,7 @@ razmerje_vzorec <- auc.list$razmerje
 ```
 <br>
 
-Iz ROC krivulje lahko vidimo, da je na naših podatkih Marker 1 boljši kot Marker 2. Vrednosti AUC, torej velikosti ploščine pod ROC krivuljama pa sta:
+Iz ROC krivulje lahko vidimo, da je na naših podatkih Marker 1 boljši kot Marker 2. Vrednosti AUC, torej velikosti ploščin pod ROC krivuljama pa sta:
 
 * $AUC_1$: `r round(auc1,3)`
 * $AUC_2$: `r round(auc2,3)`
@@ -148,11 +145,11 @@ kable(testi, booktabs=T, caption="Definicije testov") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
-Izkaže se, da v kolikor želimo, da naši testi delujejo tudi za različno porazdeljene markerje, moramo pred izračunom testne statistike in permutiranjem markerja pretvoriti tako, da jim priredimo ranke. S tem na nek način standardiziramo spremenljivki, brez da bi s tem vplivali na vrednost AUC statistike. 
+Izkaže se, da v kolikor želimo, da naši testi delujejo tudi za različno porazdeljene markerje, moramo pred izračunom testne statistike in permutiranjem markerja pretvoriti tako, da jim priredimo range. S tem na nek način standardiziramo spremenljivki, brez da bi s tem vplivali na vrednosti AUC statistike.
 
-V primeru, ko permutiramo stolpec z bolezmi, se moramo zavedati, da s tem uničimo vpliv markerjev na izid bolezni, torej bi v takšnem primeru markerja mogla biti enakovredna, vendar pa bi imela oba vrednost AUC enako $\frac{1}{2}$.
+V primeru, ko permutiramo stolpec z boleznimi, se moramo zavedati, da s tem uničimo vpliv markerjev na izid bolezni, torej bi v takšnem primeru markerja morala biti enakovredna, vendar pa bi imela oba vrednost AUC enako $\frac{1}{2}$.
 
-V nasprotju s permutacijo po stoplcu z boleznimi, v primeru permutiranja po markerjih želimo obdržati njuno medsebojno odvisnot in vpliv na izid bolezni. To naredimo tako, da v vsaki vrstici markerja slučajno zamenjamo ali ne.
+V nasprotju s permutacijo po stolpcu z boleznimi, v primeru permutiranja po markerjih želimo obdržati njuno medsebojno odvisnot in vpliv na izid bolezni. To naredimo tako, da v vsaki vrstici markerja slučajno zamenjamo ali ne.
 
 ### Ničelna domneva
 
@@ -213,13 +210,13 @@ Dobljena vrednost testne statistike znaša `r round(test4.1$t,3)`, izračunana p
 
 ## Lastnosti testov
 
-Preverili bomo lastnosi vseh štirih testov, in izbrali tistega, ki je najbolj primeren za naše podatke. 
+Preverili bomo lastnosi vseh štirih testov in izbrali tistega, ki je najbolj primeren za naše podatke. 
 
-Za preverjanje velikosti testa bomo podatke simulirali pod ničelno hipotezo, ki pravi, da je AUC enaka za oba parametra. Torej izenačimo $\beta_1$ in $\beta_2$ in izid generiramo kot $Y=3X_1+3X_2+\epsilon$. Za določitev velikosti testa večkrat simuliramo podatke in izvedemo test, potem pa pogledamo delež zavrnjenih ničelnih hipotez, za katerega želimo, da je manjši ali enak stopnji značilnosti $\alpha=0.05$. 
+Za preverjanje velikosti testa bomo podatke simulirali pod ničelno hipotezo, ki pravi, da je vrednost AUC enaka za oba parametra. Torej izenačimo $\beta_1$ in $\beta_2$ in izid generiramo kot $Y=3X_1+3X_2+\epsilon$. Za določitev velikosti testa večkrat simuliramo podatke in izvedemo test, potem pa pogledamo delež zavrnjenih ničelnih hipotez, za katerega želimo, da je manjši ali enak stopnji značilnosti $\alpha=0.05$. 
 
 Za preverjanje moči testa bomo podatke simulirali s pravimi vrednostmi, ki smo jih določili na začetku poglavja. Pogledali bomo, kakšno moč ima posamezen test, tako da bomo podatke simulirali večkrat in na koncu izračunali delež zavrnjenih ničelnih hipotez. Za ta delež si seveda želimo, da je čimvečji.
 
-Odločimo se za $1000$ simulacij za vsak test, za velikosti in za moč.
+Odločimo se za $10000$ simulacij za vsak test za velikosti in moč.
 
 ```{r}
 kable(lastnosti1 %>% round(2), booktabs=T, caption="Lastnosti testov") %>%
@@ -229,9 +226,9 @@ kable(lastnosti1 %>% round(2), booktabs=T, caption="Lastnosti testov") %>%
 
 # Lastnosti permutacijskih testov na različnih scenarijih
 
-Pogledali smo že, kako naši permutacijski testi delujejo na primeru, kjer sta markerja sicer korelirana, vendar sta enako in normalno porazdeljena. Želimo preveriti, kako se permutacijski testi obašanjo še v drugih, bolj ali manj ekstremnih primerih. V ta namen definiramo različne scenarije, glede na porazdelitve markerjev in glede na velikost vplivov markerjev na izid bolezni.
+Pogledali smo že, kako naši permutacijski testi delujejo na primeru, kjer sta markerja sicer korelirana, vendar sta enako in normalno porazdeljena. Želimo preveriti, kako se permutacijski testi obnašajo še v drugih, bolj ali manj ekstremnih primerih. V ta namen definiramo različne scenarije, glede na porazdelitve markerjev in glede na velikost vplivov markerjev na izid bolezni.
 
-Podatke generiramo na enak način kot v prejšnjem primeru, le da spreminjamo porazdelitve, velikosti vplivov in velikost začetnega vzorca. V vseh primerih smo za lastnosti testa uporabili $1000$ simulacij. 
+Podatke generiramo na enak način kot v prejšnjem primeru, le da spreminjamo porazdelitve, velikosti vplivov in velikost začetnega vzorca. V vseh primerih smo za lastnosti testa uporabili $10000$ simulacij. Lahko izračunamo 95% interval zaupanja za velikost testa, ki je [0.046,0.054]. Če dobimo velikost testa izven tega intervala, posumimo, da velikost testa ni prava (0.05).
 
 Hitro lahko ugotovimo, da je časovna zahtevnost simulacij za več različnih scenarijev zelo velika. V pomoč v programu R nam je tako paket `parallel` in funkcija `parSapply`, s pomočjo katerih simulacije prenesemo na več jeder znotraj enega procesorja in s tem zmanjšamo časovno zahtevnost. Na tak način smo zmanjšali več urne ali celo več dnevne simulacije na simulacijo dolgo 20 minut. 
 
@@ -262,7 +259,7 @@ Predpostavke scenarija so:
 Ko prvič generiramo podatke, dobimo $AUC_1$=`r round(auc1,3)` in $AUC_2$=`r round(auc2,3)`. Tako dobimo razliko `r round(razlika_vzorec,3)` in razmerje `r round(razmerje_vzorec,3)`.
 
 ```{r}
-kable(lastnosti1, booktabs=T, caption="Prvotni scenarij") %>%
+kable(lastnosti1%>%round(2), booktabs=T, caption="Prvotni scenarij") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F)
 ```
 
@@ -515,7 +512,7 @@ kable(lastnosti10 %>% round(2), booktabs=T, caption="Velikosti in moči testov")
 
 Ker smo tekom simulacij in pregledovanja lastnosti testov že razbrali, da v primeru permutiranja po stolpcu z boleznimi test ne deluje dobro, bomo v tem razdelku podrobneje pogledali le teste, kjer permutiramo markerje. 
 
-Testa se torej razlikujeta le to tem, ali za testno statistiko vzamemo razliko ali razmerje AUC vrednosti markerjev. Za začetek si poglejmo velikosti za različna testa in scenarije.
+Testa se torej razlikujeta le po tem, ali za testno statistiko vzamemo razliko ali razmerje AUC vrednosti markerjev. Za začetek si poglejmo velikosti in moči za različna testa in scenarije.
 
 ```{r}
 velikosti <- data.frame(lastnosti1$Velikost[c(1,3)],lastnosti2$Velikost[c(1,3)],lastnosti3$Velikost[c(1,3)],
@@ -539,7 +536,7 @@ colnames(moci) <- c("Razlika", "Razmerje")
 tabela.out <- cbind(velikosti,moci)
 
 kable(tabela.out%>%round(2), align = "c", booktabs = T,
-      caption = "Velikosti in moči za Test 1 in Test 2") %>%
+      caption = "Velikosti in moči za Test 1 in Test 3") %>%
 kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_width = F) %>%
 add_header_above(c(" ", "Velikost" = 2, "Moč" = 2))
 ```
@@ -547,21 +544,23 @@ add_header_above(c(" ", "Velikost" = 2, "Moč" = 2))
 
 # Zaključek
 
-Najprej sva poskusili s permutiranjem celotnih stolpcev markerjev, torej da v vsakem stolpcu naključno premešamo vse vrednosti. Pri tem sva vedno dobili velikosti prvega in tretjega testa (ko premutiramo po markerjih) enake nič. Ugotovili sva, da tako mešanje ni primerno, ker s tem uničimo odvisnost med markerjema in izidom. Poskusili sva tudi z mešanjem vrednosti znotraj skupin bolnih in zdravih, vendar v tem primeru prav tako delno uničimo odvisnost med markerji in izidom. Kot najboljše permutiranje sva izbrali permutiranje znotraj posamezne osebe - torej da za vsakega posameznika naključno zamenjamo vrednosti prvega in drugega markerja. Tako permutiranje se je izkazalo za uspešno, saj na ta način dobimo prave velikosti testov za prvi in tretji test. Ko permutiramo izid pa nimamo druge možnosti, kot da naključno premešamo celotni stolpec tabele. S tem izničimo odvisnost markerjev in izida, posledično test2 in test4 nista primerna za uporabo.
+Najprej smo poskusili s permutiranjem celotnih stolpcev markerjev, torej da v vsakem stolpcu naključno premešamo vse vrednosti. Pri tem smo vedno dobili velikosti prvega in tretjega testa (ko premutiramo po markerjih) enake nič. Ugotovili smo, da tako mešanje ni primerno, ker s tem uničimo odvisnost med markerjema in izidom. Poskusili smo tudi z mešanjem vrednosti znotraj skupin bolnih in zdravih, vendar v tem primeru prav tako delno uničimo odvisnost med markerji in izidom. Kot najboljše permutiranje smo izbrali permutiranje znotraj posamezne osebe - torej da za vsakega posameznika naključno zamenjamo vrednosti prvega in drugega markerja. Tako permutiranje se je izkazalo za uspešno, saj na ta način dobimo prave velikosti testov za prvi in tretji test. Ko permutiramo izid pa nimamo druge možnosti, kot da naključno premešamo celotni stolpec tabele. S tem izničimo odvisnost markerjev in izida, posledično test 2 in test 4 nista primerna za uporabo.
 
-Test1 ima vedno največjo moč, z izjemo primera različnih porazdelitev markerjev (različnih pričakovanih vrednosti). Ta test bi ocenili kot najboljši. Je zelo konstanten, zmoti ga edino različna porazdelitev markerjev.
+Najprej smo izvedli permutacijske teste brez uporabe rangov. Ker se je izkazalo, da taki testi niso primerni za markerja, ki nimata povsem enake porazdelitve, smo poskusili z uporabo rangov. Ker so se rangi izkazali za boljši pristop, smo vse permutacijske teste spremenili z uvedbo rangov.
 
-Ugotovili smo, da markerja morata biti generirana iz enakih porazdelitev, sicer velikosti testov 1 in 3 niso prave.
-Bolj kot sta si markerja različna, manjši sta velikosti testov, kjer permutiramo po markerjih. STANDARDIZACIJA/RANGI????
+Test 1 in test 3 sta z uporabo rangov dokaj enakovredna. Če delamo brez rangov, se test 1 izkaže za malenkost boljšega, razen v primeru različnih pričakovanih vrednosti markerjev.
 
-Ko mešamo po $Y$, s tem uničimo odvisnost med $X$ in $Y$. Zato testa 2 in 4 nista ustrezna.
-Test4 se izkaže za zelo neprimeren test. Velikost tega testa je vedno 0, moč pa najmanjša izmed vseh testov.
+Ugotovili smo, da če delamo brez rangov, morata biti markerja generirana iz enakih porazdelitev, sicer velikosti testov 1 in 3 niso prave.
+Bolj kot sta si markerja različna, manjši sta velikosti testov, kjer permutiramo po markerjih.
+
+Ko mešamo po $Y$, s tem uničimo odvisnost med $X$ in $Y$ in zato testa 2 in 4 nista ustrezna.
+Test 4 se v primeru breu uporabe rangov izkaže za zelo neprimeren test. Velikost tega testa je vedno 0, moč pa najmanjša izmed vseh testov. Z uporabo rangov postaneta test 2 in test 4 bolj enakovredna.
 
 Permutacijski testi delujejo tako na odvisnih kot neodvisnih markerjih. Neodvisnost markerjev nekoliko poveča moč testa.
 
 Če imata markerja zelo podoben vpliv na odzivno spremenljivko (majhna razlika med $\beta_1$ in $\beta_2$), so velikosti testov še vedno prave, moči pa se zelo zmanjšajo.
 
-Testi dobro delujejo tudi na manjših vzorcih. Porazdelitve markerjev ne rabijo biti normalne. Delujejo tudi na diskretnih porazdelitvah markerjev (preverili smo na Poissonovi).
+Testi dobro delujejo tudi na manjših vzorcih. Porazdelitve markerjev ne rabijo biti normalne. Delujejo tudi na diskretnih porazdelitvah markerjev (preverili smo na Poissonovi). Če sta markerja iz različnih porazdelitev ????
 
 # Viri
 

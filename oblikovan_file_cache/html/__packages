@@ -1,9 +1,0 @@
-base
-knitr
-rmdformats
-dplyr
-mvtnorm
-gplots
-ROCR
-kableExtra
-data.table
