@@ -231,7 +231,7 @@ Pogledali smo že, kako naši permutacijski testi delujejo na primeru, kjer sta 
 
 Podatke generiramo na enak način kot v prejšnjem primeru, le da spreminjamo porazdelitve, velikosti vplivov in velikost začetnega vzorca. V vseh primerih smo za lastnosti testa uporabili $10000$ simulacij. Glede na število izvedenih simulacij, lahko izračunamo 95% interval zaupanja za velikost testa, v kolikor je velikost enaka 0.05. Dobljen interval zaupanje je [0.046, 0.054] in če dobimo velikost testa izven tega intervala, posumimo, da velikost testa ni prava (0.05).
 
-Hitro lahko ugotovimo, da je časovna zahtevnost simulacij za več različnih scenarijev zelo velika. V veliko pomoč v programu R nam je tako lahko paket `parallel` in funkcija `parSapply`, s pomočjo katerih simulacije prenesemo na več jeder znotraj enega procesorja in s tem zmanjšamo časovno zahtevnost. Na tak način smo zmanjšali več dnevne simulacije na simulacijo dolgo približno 3 ure. Seveda pa je v tem primeru dolžina simulacije odvisna od zmogljivosti računalnika, predvsem od tega, koliko jedrni procesor se nahaja v računalniku.  
+Hitro lahko ugotovimo, da je časovna zahtevnost simulacij za več različnih scenarijev zelo velika. V veliko pomoč v programu R nam je tako lahko paket `parallel` in funkcija `parSapply`, s pomočjo katerih simulacije prenesemo na več jeder znotraj enega procesorja in s tem zmanjšamo časovno zahtevnost. Na tak način smo zmanjšali več dnevne simulacije na simulacijo, dolgo približno 3 ure. Seveda je v tem primeru dolžina simulacije odvisna od zmogljivosti računalnika, predvsem od tega, koliko jedrni procesor se nahaja v računalniku.  
 
 ## Rezultati simulacij {.tabset .tabset-fade .tabset-pills}
 
@@ -246,7 +246,7 @@ razmerje_vzorec <- auc.list$razmerje
 ```
 
 <br>
-Prvotni primer smo si pogledali že v prejšnjem razdelku, kot referenco in za lažjo primerjavo med različnimi scenariji pa še enkrat poglejmo samo lastnosti testov. 
+Prvotni primer smo si pogledali že v prejšnjem razdelku. Kot referenco in za lažjo primerjavo med različnimi scenariji pa še enkrat poglejmo same lastnosti testov. 
 
 <div class = "row">
 
@@ -296,7 +296,7 @@ kable(lastnosti1%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 1
 <div class = "col-md-8">
 <br>
 <strong>Komentar:</strong>
-V primeru, ko imamo enako in normalno porazdeljena markerja, so vse moči testov zadovoljivo visoke. Prav tako so velikosti testov ustrezne, saj so manjše ali enake 0.05. V primeru ko mešamo po stolpcu z boleznimi, so velikosti testov zelo majhne in velikosti velike, kar je najverjetneje zaradi ugodnih predpostavk, saj kot smo že omenili, test uniči povezanost markerjev z nastopom bolezni. 
+V primeru, ko imamo enako in normalno porazdeljena markerja, so vse moči testov zadovoljivo visoke. Prav tako so velikosti testov ustrezne, saj so manjše ali enake 0.05. V primeru, ko mešamo po stolpcu z boleznimi, so velikosti testov zelo majhne in velikosti velike, kar je najverjetneje zaradi ugodnih predpostavk. Kot smo že omenili, tako permutiranje uniči povezanost markerjev s pojavom bolezni. 
 </div>
 
 </div>
@@ -313,7 +313,7 @@ razmerje_vzorec <- auc.list$razmerje
 ```
 
 <br>
-Zanima nas, kaj se zgodi, če glede na prvotni primer enakih normalnih porazdelitev, pri enem od markerjev porazdelitev malo zamaknemo. S tem namenom smo spremenili povprečno vrednost drugega markerja iz \(0\) na \(2\).
+Zanima nas, kaj se zgodi, če glede na prvotni primer enakih normalnih porazdelitev pri enem od markerjev porazdelitev malo zamaknemo. S tem namenom smo spremenili povprečno vrednost drugega markerja iz \(0\) na \(2\).
 
 <div class = "row">
 <div class = "col-md-4">
@@ -357,7 +357,7 @@ kable(lastnosti2%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 2
 <div class = "col-md-8">
 <br>
 <strong>Komentar:</strong>
-Zamaknjena porazdelitev, oziroma različni pričakovani vrednosti markerjev ne spremenita lastnosti testov, kjub temu, da je zaradi kombinacije predpostavk v tem primeru AUC vrednost drugega markerja lahko bolj primerljiva z AUC vrednostjo prvega markerja. Izkazalo se je, da v kolikor v testih ne bi uporabili rangiranja in s tem na nek način standardiziranja spremenljivk, bi bile tako velikosti, kot moči testa v primeru zamaknjene porazdelitve veliko slabše.
+Opazujemo zamaknjeno porazdelitev oziroma različni pričakovani vrednosti markerjev. Kjub temu, da je zaradi kombinacije predpostavk v tem primeru AUC vrednost drugega markerja lahko bolj primerljiva z AUC vrednostjo prvega markerja, se lastnosti testov ne spremenijo kaj dosti. Izkazalo se je, da v kolikor v testih ne bi uporabili rangiranja in s tem na nek način standardiziranja spremenljivk, bi bile tako velikosti kot tudi moči testov veliko slabše (v primeru zamaknjene porazdelitve).
 </div>
 </div>
 
@@ -373,7 +373,7 @@ razmerje_vzorec <- auc.list$razmerje
 ```
 
 <br>
-Če želimo preveriti kako vpliva odvisnost markerjev, moramo preveriti, kakšne rezultate dobimo pri različnih korelacijskih faktorjih med markerjema. V tem primeru bomo pogledali rezultate za nekorelirana markerja. 
+Če želimo preveriti vpliv odvisnosti markerjev, moramo preveriti, kakšne rezultate dobimo pri različnih korelacijskih faktorjih med markerjema. V tem primeru bomo pogledali rezultate za nekorelirana markerja. 
 
 <div class = "row">
 <div class = "col-md-4">
@@ -417,7 +417,7 @@ kable(lastnosti3%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 3
 <div class = "col-md-8">
 <br>
 <strong>Komentar:</strong>
-Glede na razliko v ROC krivuljah sklepamo, da je lažje ločiti kateri marker bolje napoveduje, oziroma ima večji vpliv na izid bolezni. Vrednost AUC drugega markerja je v primeru nekoreliranosti s prvim nižja in zato tudi hitreje zavrnemo test. Z našimi simulacijami smo test zavrnili skoraj vedno (vrednosti so zaokrožene). 
+Glede na razliko v ROC krivuljah sklepamo, da je lažje ločiti, kateri marker bolje napoveduje oziroma ima večji vpliv na izid bolezni. Vrednost AUC drugega markerja je v primeru nekoreliranosti s prvim nižja in zato tudi hitreje zavrnemo ničelno domnevo. Z našimi simulacijami smo $H_0$ zavrnili skoraj vedno (vrednosti so zaokrožene). 
 </div>
 </div>
 
@@ -433,7 +433,7 @@ razmerje_vzorec <- auc.list$razmerje
 ```
 
 <br>
-Če želimo preveriti kako vpliva odvisnost markerjev, moramo preveriti, kakšne rezultate dobimo pri različnih korelacijskih faktorjih med markerjema. V tem primeru bomo pogledali rezultate za močno koreliranima markerja. 
+Če želimo preveriti, kako odvisnost markerjev vpliva na teste, moramo preveriti, kakšne rezultate dobimo pri različnih korelacijskih faktorjih med markerjema. V tem primeru bomo pogledali rezultate za močno korelirana markerja. 
 
 <div class = "row">
 <div class = "col-md-4">
@@ -477,7 +477,7 @@ kable(lastnosti4%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 4
 <div class = "col-md-8">
 <br>
 <strong>Komentar:</strong>
-V nasprotju z nekoreliranimi podatki, pa pri močno koreliranih praktično ne moremo več ločiti, kateri marker je tisti, ki zares vpliva na izid bolezni. V takem primeru smo dobili vrednosti AUC zelo visoke za oba markerja in moč testa je posledično veliko nižja. Velikost testa je malo manjša kot v ostalih primerih z normalno porazdeljenimi markerji.
+V nasprotju z nekoreliranimi podatki pri močno koreliranih praktično ne moremo več ločiti, kateri marker je tisti, ki zares vpliva na izid bolezni. V takem primeru smo dobili vrednosti AUC zelo visoke za oba markerja in moč testa je posledično veliko nižja. Velikost testa je malo manjša kot v ostalih primerih z normalno porazdeljenimi markerji.
 </div>
 </div>
 
@@ -537,7 +537,7 @@ kable(lastnosti5%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 5
 <div class = "col-md-8">
 <br>
 <strong>Komentar:</strong>
-Ko imata markerja podoben, oziroma skoraj enak vpliv na izid bolezni, sta tudi AUC vrednosti zelo podobni. Posledično je seveda moč testa manjša, opazimo pa tudi, da se je v primeru Testa 1 (mešanje po markerjih in razlika) znižala velikost za 1.o.t. Moč testa bi lahko mogoče povečali, v kolikor bi imeli večji vzorec, vseeno pa bi le ta ostala zelo nizka. 
+Ko imata markerja podoben oziroma skoraj enak vpliv na izid bolezni, sta tudi AUC vrednosti zelo podobni. Posledično je seveda moč testa manjša, opazimo pa tudi, da se je v primeru Testa 1 (mešanje po markerjih in razlika) znižala velikost za 1.o.t. Moč testa bi morda lahko povečali, če bi imeli večji vzorec, vseeno pa bi le ta ostala zelo majhna. 
 </div>
 </div>
 
@@ -597,7 +597,7 @@ kable(lastnosti6%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 6
 <div class = "col-md-8">
 <br>
 <strong>Komentar:</strong>
-Vrednosti AUC sta si v našem primeru nekoliko bolj različni, vendar zelo podobni. Moč testa je zato zelo majhna, kar smo lahko tudi pričakovali. 
+Vrednosti AUC sta si v tem primeru nekoliko bolj različni kot pri prejšnjih primerih, vendar vseeno zelo podobni. Moč testa je zato majhna, kar pa smo lahko pričakovali.
 </div>
 </div>
 
@@ -613,7 +613,7 @@ razmerje_vzorec <- auc.list$razmerje
 ```
 
 <br>
-Želimo preveriti, kako se obnesejo permutacijski testi v primeru zelo majhnega vzorca podatkov, zato v tem primeru generiramo manjši začetni vzorec, ostale predpostavke pa pustimo takšne, kot so bile v prvotnem primeru.
+Želimo preveriti, kako se permutacijski testi obnesejo v primeru zelo majhnega vzorca. Generiramo manjši začetni vzorec, ostale predpostavke pa pustimo takšne, kot so bile v prvotnem primeru.
 
 <div class = "row">
 <div class = "col-md-4">
@@ -657,7 +657,7 @@ kable(lastnosti7%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 7
 <div class = "col-md-8">
 <br>
 <strong>Komentar:</strong>
-Kadar imamo tako majhen vzorec, testi niso več zanesljivi. Težaven je že izračun ROC krivulje in posledično vrednosti AUC.
+Kadar imamo tako majhen vzorec, testi niso več tako zanesljivi. Težaven je že izračun ROC krivulje in posledično vrednosti AUC.
 </div>
 </div>
 ***
@@ -672,7 +672,7 @@ razmerje_vzorec <- auc.list$razmerje
 ```
 
 <br>
-Poglejmo še primer, ko markerja nista generirana iz normalne porazdelitve. V tem primeru naj bosta oba oba generirana iz $\Gamma(2,2)$ ter medsebojno korelirana z $\rho=0.5$.
+Poglejmo še primer, ko markerja nista generirana iz normalne porazdelitve. V tem primeru naj bosta oba generirana iz $\Gamma(2,2)$ ter medsebojno korelirana z $\rho=0.5$.
 
 <div class = "row">
 <div class = "col-md-4">
@@ -716,7 +716,7 @@ kable(lastnosti8%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 8
 <div class = "col-md-8">
 <br>
 <strong>Komentar:</strong>
-V primeru drugačne porazdelitve, kot normalne, so testi še vedno zelo zanesljivi. Nekoliko manjšo moč imata Test 2 in Test 4, torej testa, kjer permutiramo po stolpcu z boleznimi. Kot smo že omenili, tak test ni pravilen, saj ne uniči le razlike med markerjema, vednar celoten vpliv markerjev. 
+V primeru drugačne porazdelitve (ne normalne), so testi še vedno zelo zanesljivi. Nekoliko manjšo moč imata Test 2 in Test 4, torej testa, kjer permutiramo po stolpcu z boleznimi. Kot smo že omenili, tak test ni pravilen, saj ne uniči le razlike med markerjema, pač pa celoten vpliv markerjev. 
 </div>
 </div>
 ***
@@ -731,7 +731,7 @@ razmerje_vzorec <- auc.list$razmerje
 ```
 
 <br>
-Poglejmo si še primer, ko markerja generiramo markerja iz diskretne porazdelitve. Naj bo $X_1 \sim Pois(2)$, $X_2 \sim Pois(2)$ in $\rho=0.5$.
+Poglejmo si še primer, ko markerja generiramo iz diskretne porazdelitve. Naj bo $X_1 \sim Pois(2)$, $X_2 \sim Pois(2)$ in $\rho=0.5$.
 
 <div class = "row">
 <div class = "col-md-4">
@@ -775,7 +775,7 @@ kable(lastnosti9%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 9
 <div class = "col-md-8">
 <br>
 <strong>Komentar:</strong>
-Tudi v primeru diskretne porazdelitve se Test 1 in Test 2 izkažeta za zanesljivega. Moč testa je visoka, primerni pa sta tudi velikosti testov.
+Tudi v primeru diskretne porazdelitve se Test 1 in Test 3 izkažeta za zanesljiva. Moč testa je visoka, primerni pa sta tudi velikosti testov.
 </div>
 </div>
 ***
@@ -834,7 +834,7 @@ kable(lastnosti10%>%round(2), booktabs=T, caption="Lastnosti testov za Scenarij 
 <div class = "col-md-8">
 <br>
 <strong>Komentar:</strong>
-V našem primeru različnih porazdelitev sta ROC krivulji močno različni ena od druge. vrednot AUC prvega markerja je tako zelo visoka, vrednost AUC drugega markerja pa zelo nizka. Zato smo dobili tudi tako visoke moči testov. Dobili pa smo tudi zelo majhne velikosti, kar pomeni, da v primeru enakih vplivov test zelo redko zavrne ničelno hipotezo. 
+V našem primeru različnih porazdelitev sta ROC krivulji močno različni ena od druge. vrednot AUC prvega markerja je tako zelo visoka, vrednost AUC drugega markerja pa zelo nizka. Zato smo dobili tudi tako visoke moči testov. Dobili smo tudi zelo majhne velikosti, kar pomeni, da v primeru enakih vplivov test zelo redko zavrne ničelno hipotezo. 
 </div>
 </div>
 
@@ -842,7 +842,7 @@ V našem primeru različnih porazdelitev sta ROC krivulji močno različni ena o
 
 ## Primerjava lastnosti testov glede na scenarij
 
-Ker smo tekom simulacij in pregledovanja lastnosti testov že razbrali, da v primeru permutiranja po stolpcu z boleznimi test ne deluje dobro, bomo v tem razdelku podrobneje pogledali le teste, kjer permutiramo markerje. 
+Ker smo tekom simulacij in pregledovanja lastnosti testov že razbrali, da v primeru permutiranja po stolpcu z boleznimi test ne deluje dobro, bomo v tem razdelku podrobneje pogledali le teste, kjer permutiramo po markerjih. 
 
 Testa se torej razlikujeta le po tem, ali za testno statistiko vzamemo razliko ali razmerje AUC vrednosti markerjev. V spodnji tabeli so prikazane velikosti in moči za različna testa in scenarije.
 
@@ -873,17 +873,17 @@ kable_styling(bootstrap_options = c("striped", "hover", "responsive"), full_widt
 add_header_above(c(" ", "Velikost" = 2, "Moč" = 2))
 ```
 
-Velikosti testov so primerne v vseh narejenih scenarijih, opazimo pa, da so v primeru testne statistike razmerij nekoliko manjše. Moči testov so primerljive in se razlikujejo za največ 1 o.t., kjer ima manjšo moč test z razmerji. Ne glede na manjše razlike, bi lahko rekli, da sta oba testa primerna za uporabo v skoraj vseh primerih. Zelo majhno moč imata testa v primeru močno koreliranih podatkov, zelo podobnih vplivov markerjev in pa v primeru zelo majhnega vzorca. V prvih dveh scenarijih imamo problem z ločitvijo med markerjema, v zadnjem pa že z generiranjem ROC krivulje. 
+Velikosti testov so primerne v vseh narejenih scenarijih, opazimo pa, da so v primeru testne statistike razmerij nekoliko manjše. Moči testov so primerljive in se razlikujejo za največ 1 o.t., kjer ima manjšo moč test z razmerji. Ne glede na manjše razlike bi lahko rekli, da sta oba testa primerna za uporabo v skoraj vseh primerih. Testa imata zelo majhno moč v primeru močno koreliranih podatkov, zelo podobnih vplivov markerjev in pa v primeru zelo majhnega vzorca. V prvih dveh scenarijih imamo problem z ločitvijo med markerjema, v zadnjem pa že z generiranjem ROC krivulje. 
 
 # Pot do uspeha
 
-Pri definiranju podatkov in permutacijskih testov smo pred končnimi verzijami naleteli na kar nekaj težav, ki pa so vredne omembe. 
+Pri definiranju podatkov in permutacijskih testov smo pred končnimi verzijami naleteli na kar nekaj težav, ki so vredne omembe. 
 
 Najprej smo poskusili s permutiranjem celotnih stolpcev markerjev, torej da v vsakem stolpcu naključno premešamo vse vrednosti. Pri tem smo vedno dobili velikosti prvega in tretjega testa (ko premutiramo po markerjih) enake nič. Ugotovili smo, da tako mešanje ni primerno, ker s tem uničimo odvisnost med markerjema in izidom.
 
-Da bi se izognili izničevanju vpliva markerjev smo tako poskusili z mešanjem vrednosti znotraj skupin bolnih in zdravih, vendar v tem primeru prav tako delno uničimo odvisnost med markerji in izidom. Posledično smo se nato odločili, da je najboljši način za ohranjanje vplivov permutiranje znotraj posameznikov, torej da za vsakega posameznika naključno zamenjamo vrednosti prvega in drugega markerja. Tako permutiranje se je izkazalo za uspešno, saj na ta način dobimo prave velikosti testov za prvi in tretji test. Pri permutiranju izida pa nimamo druge možnosti, kot da naključno premešamo celotni stolpec tabele in s tem izničimo odvisnost markerjev in izida.
+Da bi se izognili izničevanju vpliva markerjev, smo tako poskusili z mešanjem vrednosti znotraj skupin bolnih in zdravih, vendar v tem primeru prav tako delno uničimo odvisnost med markerji in izidom. Posledično smo se nato odločili, da je najboljši način za ohranjanje vplivov permutiranje znotraj posameznikov. Za vsakega posameznika torej naključno zamenjamo vrednosti prvega in drugega markerja. Tako permutiranje se je izkazalo za uspešno, saj na ta način dobimo prave velikosti testov za prvi in tretji test. Pri permutiranju izida pa nimamo druge možnosti, kot da naključno premešamo celotni stolpec tabele in s tem izničimo odvisnost markerjev in izida.
 
-Najprej smo izvedli permutacijske teste brez uporabe rangov. Ker se je izkazalo, da taki testi niso primerni za markerja, ki nimata povsem enake porazdelitve, smo razmišljali, kako bi porazdelitvi standardizirali in odločili smo se poiskusiti z rangi, s tem pa smo pridobili končne teste, ki so uporabljeni v seminarski nalogi. 
+Najprej smo izvedli permutacijske teste brez uporabe rangov. Ker se je izkazalo, da taki testi niso primerni za markerja, ki nimata povsem enake porazdelitve, smo razmišljali, kako bi porazdelitvi standardizirali. Odločili smo se poskusiti z rangi, s tem pa smo pridobili končne teste, ki so uporabljeni v seminarski nalogi.
 
 Na poti do iskanja pravih testov, ki bodo učitnkoviti in stabilni, pa nam je bila v pomoč tudi funkcija `praise()` iz istoimenskega paketa v programu R. Primer izpisa funkcije je prikazan spodaj.   
 
@@ -892,28 +892,30 @@ praise()
 ```
 
 
-
 # Zaključek
 
-Na našem praktičnem primeru smo preiskusili definirane teste na podaktih, ki so bili generirani tako, da je en marker boljši od drugega, sta pa korelirana. V tem prvotnem primeru sta bila markerja enako, normalno porazdeljena. Pri prvih treh testih, smo ničeno hipotezo, da sta markerja enakovredna, pri stopnji značilnosti 0.05 zavrnili in sklepali, da imata markerja statistično značilno razliko AUC vrednosti. Ničelne hipoteze pa pri stopnji značilnosti 0.05 ali manj nismo uspeli zavrniti pri četrtem testu. 
+Pri našem praktičnem primeru smo definirane teste preiskusili na podaktih, ki so bili generirani tako, da je en marker boljši od drugega, med seboj pa sta korelirana. V tem prvotnem primeru sta bila markerja enako (normalno) porazdeljena. Pri prvih treh testih smo ničeno hipotezo, da sta markerja enakovredna, pri stopnji značilnosti 0.05 zavrnili in sklepali, da obstaja statistično značilna razlika med AUC vrednostima markerjev. Ničelne hipoteze pri stopnji značilnosti 0.05 ali manj pa nismo uspeli zavrniti pri četrtem testu. 
 
-Pri pregledovanju lastnosti smo si pogledali 10 različnih scenarijev. Zanimalo nas je kako stabilen je test, če spreminjamo porazdelitve, korelacijo markerjev in pa velikost vzorca. 
+Pri pregledovanju lastnosti smo si pogledali 10 različnih scenarijev. Zanimalo nas je, kako stabilen je test, če spreminjamo porazdelitve, korelacijo markerjev in velikost vzorca. 
 
-Ugotovili smo, da sta testa, kjer permutiramo markerje znotraj posameznikov primerna skoraj v vsakem primeru. Velikost testa je bila vedno enaka ali manjša stopnji značilnosti. 
+Ugotovili smo, da sta testa, kjer permutiramo markerje znotraj posameznikov, primerna skoraj v vsakem primeru. Velikost testa je bila vedno enaka ali manjša stopnji značilnosti. 
 
-Moči testa so bile manjše v primeru majhnega vzorca, v tem primeru pa smo opazili tudi, da imamo težave že z generiranjem ROC krivulj in izračunom AUC. 
+Moči testov so bile v primeru majhnega vzorca manjše. V tem primeru smo tudi opazili, da imamo težave z generiranjem ROC krivulj in izračunom AUC. 
 
-Testi so imeli zelo majhno moč tudi v primeru skoraj enakega vpliva markerjev, kar je pričakovano, saj to pomeni da noben od markerjev ni izrazito boljši od drugega in rezultati bi bili podobni, ne glede na to katerega bi izbrali. Pri podobnem vplivu se je moč rahlo, vendar še vedno zelo malo dvignila v primeru, ko sta bila markerja neodvisna. 
+Testi so imeli zelo majhno moč tudi v primeru skoraj enakega vpliva markerjev. To je bilo pričakovano, saj to pomeni, da noben od markerjev ni izrazito boljši od drugega. Rezultati bi bili podobni, ne glede na to, katerega bi izbrali. Pri podobnem vplivu se je moč rahlo, vendar še vedno zelo malo, dvignila v primeru, ko sta bila markerja neodvisna. 
 
-Nekoliko manjša moč testov je bila tudi, ko smo imeli močno korelirana markerja. Videli smo, da smo v tem primeru dobili zelo visoki AUC vrednosti obeh markerjev, ki pa sta si bili zelo podobni. 
+Nekoliko manjše moči testov smo dobili tudi, ko smo imeli močno korelirana markerja. Videli smo, da smo v tem primeru dobili zelo visoki AUC vrednosti obeh markerjev, ki pa sta si bili zelo podobni. 
 
-Testi pa torej dobro delujejo na zmerno koreliranih podatkih, ne-normalno ali celo diskretno porazdeljenih markerjih in pa tudi v primeru različnih porazdelitev markerjev. Ne smemo pa seveda pozabiti na uporabo rangov, saj so le-te ključni za dobre rezultate v primeru različnih porazdelitev.  
+Testi torej dobro delujejo na zmerno koreliranih podatkih, ne-normalno ali celo diskretno porazdeljenih markerjih in tudi v primeru različno porazdelljenih markerjev. Ne smemo pa seveda pozabiti na uporabo rangov, saj so le-ti ključni za dobre rezultate v primeru različnih porazdelitev.  
 
 # Viri
 
-* https://nceas.github.io/oss-lessons/parallel-computing-in-r/parallel-computing-in-r.html
-* https://en.wikipedia.org/wiki/Receiver_operating_characteristic
-* https://towardsdatascience.com/understanding-auc-roc-curve-68b2303cc9c5
-* https://developers.google.com/machine-learning/crash-course/classification/roc-and-auc
+* Biček, M., 2009. *Grafični gradnik za merjenje kvalitete klasifikatorja s pomočjo krivulj* (Diplomsko delo). Univerza v Ljubljani, Fakulteta za računalništvo in informatiko, Ljubljana. Dostopno na: http://eprints.fri.uni-lj.si/861/1/Bi%C4%8DekM_UN.pdf
 
-* Biček, M. (2009). *Grafični gradnik za merjenje kvalitete klasifikatorja s pomočjo krivulj* (Diplomsko delo). Univerza v Ljubljani, Fakulteta za računalništvo in informatiko, Ljubljana.
+* *Classification: ROC Curve and AUC*. Google Developers. 2020. Dostopno na: https://developers.google.com/machine-learning/crash-course/classification/roc-and-auc
+
+* Jones, M., 2017. *Quick Intro to Parallel Computing in R*. Dostopno na: https://nceas.github.io/oss-lessons/parallel-computing-in-r/parallel-computing-in-r.html
+
+* Narkhede, S., 2018. *Understanding AUC - ROC Curve*. Towards Data Science. Dostopno na: https://towardsdatascience.com/understanding-auc-roc-curve-68b2303cc9c5
+
+* *Receiver operating characteristic*. Wikipedia. 2020. Dostopno na: https://en.wikipedia.org/wiki/Receiver_operating_characteristic
